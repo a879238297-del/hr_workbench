@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>HR 智能工作台 · 华辰精密制造</title>
+<style>
+/* ── 设计令牌 ── */
+:root{
+  --brand:#2563eb;--brand-light:#eff6ff;--brand-dark:#1d4ed8;
+  --ok:#16a34a;--ok-bg:#f0fdf4;
+  --alert:#e11d48;--alert-bg:#fff1f2;
+  --warn:#d97706;--warn-bg:#fffbeb;
+  --info:#7c3aed;--info-bg:#f5f3ff;
+  --surface:#f8fafc;--card:#fff;
+  --border:#e2e8f0;--border2:#cbd5e1;
+  --text:#1e293b;--muted:#64748b;--muted2:#94a3b8;
+  --radius:8px;--shadow:0 1px 3px rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.06);
+  --shadow-md:0 4px 6px -1px rgba(0,0,0,.1),0 2px 4px -1px rgba(0,0,0,.06);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Microsoft YaHei',sans-serif;background:var(--surface);color:var(--text);font-size:14px;line-height:1.5}
+.hidden{display:none!important}
+
+/* ── 登录页 ── */
+#screen-login{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#1e3a8a 0%,#2563eb 50%,#0ea5e9 100%)}
+.login-card{background:var(--card);border-radius:16px;padding:48px 40px;width:400px;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+.login-logo{text-align:center;margin-bottom:32px}
+.login-logo h1{font-size:22px;font-weight:700;color:var(--text)}
+.login-logo p{color:var(--muted);font-size:13px;margin-top:4px}
+.login-badge{display:inline-flex;align-items:center;gap:4px;background:var(--brand-light);color:var(--brand);font-size:12px;padding:2px 10px;border-radius:20px;margin-top:8px}
+.form-group{margin-bottom:16px}
+.form-group label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px;font-weight:500}
+.form-group input{width:100%;border:1.5px solid var(--border2);border-radius:var(--radius);padding:10px 14px;font-size:14px;color:var(--text);outline:none;transition:border .2s}
+.form-group input:focus{border-color:var(--brand)}
+.btn-primary{width:100%;background:var(--brand);color:#fff;border:none;border-radius:var(--radius);padding:11px;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px;transition:background .2s}
+.btn-primary:hover{background:var(--brand-dark)}
+.login-hint{text-align:center;color:var(--muted2);font-size:12px;margin-top:16px}
+.error-msg{color:var(--alert);font-size:13px;margin-top:8px;text-align:center;min-height:20px}
+
+/* ── 主界面布局 ── */
+#screen-main{display:flex;min-height:100vh}
+
+/* 左侧 Rail */
+.rail{width:220px;background:#1e293b;color:#94a3b8;display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto}
+.rail-brand{padding:20px 16px;border-bottom:1px solid #334155}
+.rail-brand h2{color:#f1f5f9;font-size:15px;font-weight:700;line-height:1.3}
+.rail-brand p{color:#64748b;font-size:12px;margin-top:2px}
+.rail-status{display:flex;align-items:center;gap:5px;margin-top:8px}
+.rail-status .dot{width:6px;height:6px;background:#22c55e;border-radius:50%}
+.rail-status span{font-size:11px;color:#22c55e}
+.rail-section{padding:12px 8px 4px;font-size:11px;color:#475569;text-transform:uppercase;letter-spacing:.05em;font-weight:600}
+.rail-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:6px;margin:2px 8px;cursor:pointer;transition:all .15s;font-size:13px;color:#94a3b8}
+.rail-item:hover{background:#334155;color:#f1f5f9}
+.rail-item.active{background:var(--brand);color:#fff}
+.rail-item.pool-item{opacity:.55;border:1.5px dashed #334155;background:transparent}
+.rail-item.pool-item:hover{opacity:.8;background:#1e3a5f}
+.rail-icon{font-size:16px;width:20px;text-align:center}
+.rail-footer{margin-top:auto;padding:16px;border-top:1px solid #334155}
+.rail-user{font-size:12px;color:#64748b;display:flex;align-items:center;justify-content:space-between}
+.btn-logout{background:none;border:1px solid #334155;color:#64748b;font-size:11px;padding:3px 8px;border-radius:4px;cursor:pointer;transition:all .2s}
+.btn-logout:hover{border-color:#e11d48;color:#e11d48}
+
+/* 主内容区 */
+.main-content{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.topbar{background:var(--card);border-bottom:1px solid var(--border);padding:12px 24px;display:flex;align-items:center;gap:16px}
+.topbar h3{font-size:16px;font-weight:600;color:var(--text)}
+.content-body{flex:1;padding:24px;overflow-y:auto}
+
+/* 步骤条 */
+.steps{display:flex;gap:0;margin-bottom:24px}
+.step{display:flex;align-items:center;padding:10px 20px;background:var(--card);border:1px solid var(--border);font-size:13px;cursor:pointer;transition:all .15s;flex:1;justify-content:center;gap:8px;color:var(--muted)}
+.step:first-child{border-radius:var(--radius) 0 0 var(--radius)}
+.step:last-child{border-radius:0 var(--radius) var(--radius) 0}
+.step:not(:first-child){border-left:none}
+.step.active{background:var(--brand);color:#fff;border-color:var(--brand);font-weight:600}
+.step.done{background:var(--ok-bg);color:var(--ok);border-color:var(--ok)}
+.step-num{width:20px;height:20px;border-radius:50%;border:1.5px solid currentColor;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
+.step.active .step-num{background:#fff;color:var(--brand)}
+.step.done .step-num{background:var(--ok);color:#fff;border-color:var(--ok)}
+
+/* 卡片 */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow)}
+
+/* 上传区域 */
+.upload-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
+.dropzone{border:2px dashed var(--border2);border-radius:var(--radius);padding:32px 20px;text-align:center;cursor:pointer;transition:all .2s;background:var(--surface);position:relative}
+.dropzone:hover,.dropzone.drag-over{border-color:var(--brand);background:var(--brand-light)}
+.dropzone.uploaded{border-color:var(--ok);border-style:solid;background:var(--ok-bg)}
+.dropzone-icon{font-size:32px;margin-bottom:8px}
+.dropzone-label{font-weight:600;color:var(--text);font-size:14px}
+.dropzone-hint{color:var(--muted);font-size:12px;margin-top:4px}
+.dropzone-file{color:var(--ok);font-size:13px;font-weight:500;margin-top:6px}
+.dropzone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer}
+
+/* 口径说明 */
+.policy-box{background:#fffbeb;border:1px solid #fcd34d;border-radius:var(--radius);padding:14px 16px;margin-bottom:20px}
+.policy-box h4{color:#92400e;font-size:13px;font-weight:600;margin-bottom:8px}
+.policy-item{display:flex;align-items:flex-start;gap:8px;font-size:12px;color:#78350f;margin-bottom:4px}
+.badge-ok{display:inline-flex;align-items:center;gap:3px;background:var(--ok-bg);color:var(--ok);font-size:11px;padding:1px 7px;border-radius:20px;font-weight:500}
+.badge-warn{display:inline-flex;align-items:center;gap:3px;background:var(--warn-bg);color:var(--warn);font-size:11px;padding:1px 7px;border-radius:20px;font-weight:500}
+.period-row{display:flex;align-items:center;gap:12px;margin-bottom:20px}
+.period-row label{font-size:13px;color:var(--muted);font-weight:500;white-space:nowrap}
+.period-row input{border:1.5px solid var(--border2);border-radius:6px;padding:7px 12px;font-size:13px;color:var(--text);outline:none}
+.period-row input:focus{border-color:var(--brand)}
+.btn-run{background:var(--brand);color:#fff;border:none;border-radius:var(--radius);padding:10px 28px;font-size:14px;font-weight:600;cursor:pointer;transition:background .2s;display:flex;align-items:center;gap:8px}
+.btn-run:hover{background:var(--brand-dark)}
+.btn-run:disabled{background:var(--muted2);cursor:not-allowed}
+
+/* 统计卡 */
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;text-align:center;box-shadow:var(--shadow)}
+.stat-card.ok{border-top:3px solid var(--ok)}
+.stat-card.alert{border-top:3px solid var(--alert)}
+.stat-card.warn-l{border-top:3px solid var(--warn)}
+.stat-card.warn-r{border-top:3px solid #f59e0b}
+.stat-num{font-size:32px;font-weight:800;line-height:1}
+.stat-card.ok .stat-num{color:var(--ok)}
+.stat-card.alert .stat-num{color:var(--alert)}
+.stat-card.warn-l .stat-num,.stat-card.warn-r .stat-num{color:var(--warn)}
+.stat-label{font-size:12px;color:var(--muted);margin-top:6px}
+
+/* 筛选条 */
+.filter-bar{display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.pill{border:1.5px solid var(--border2);border-radius:20px;padding:4px 14px;font-size:13px;color:var(--muted);cursor:pointer;transition:all .15s;background:var(--card)}
+.pill:hover{border-color:var(--brand);color:var(--brand)}
+.pill.active{background:var(--brand);color:#fff;border-color:var(--brand)}
+.search-box{margin-left:auto;position:relative}
+.search-box input{border:1.5px solid var(--border2);border-radius:6px;padding:6px 12px 6px 30px;font-size:13px;outline:none;color:var(--text);width:200px}
+.search-box input:focus{border-color:var(--brand)}
+.search-box .ico{position:absolute;left:8px;top:50%;transform:translateY(-50%);color:var(--muted2);font-size:14px}
+
+/* 结果表格 */
+.result-table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead th{background:var(--surface);border-bottom:2px solid var(--border2);padding:9px 12px;text-align:left;font-weight:600;color:var(--muted);white-space:nowrap}
+tbody tr{border-bottom:1px solid var(--border);transition:background .1s}
+tbody tr:hover{background:var(--surface)}
+tbody td{padding:9px 12px;color:var(--text)}
+tr.row-match td:first-child{color:var(--ok)}
+tr.row-alert{background:var(--alert-bg)}
+tr.row-alert td{color:#9f1239}
+tr.row-warn{background:var(--warn-bg)}
+tr.row-warn td{color:#92400e}
+.cat-badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600}
+.cat-match{background:var(--ok-bg);color:var(--ok)}
+.cat-diff{background:var(--alert-bg);color:var(--alert)}
+.cat-payroll{background:var(--warn-bg);color:var(--warn)}
+.cat-bank{background:#fef3c7;color:#b45309}
+.delta-neg{color:var(--alert);font-weight:600}
+.delta-pos{color:var(--ok);font-weight:600}
+.no-data{text-align:center;padding:40px;color:var(--muted2);font-size:13px}
+
+/* 审计卡 */
+.audit-card{margin-top:16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;font-size:12px;color:var(--muted)}
+.audit-card h4{font-weight:600;color:var(--text);margin-bottom:8px;font-size:13px}
+.audit-item{display:flex;gap:8px;margin-bottom:3px}
+.audit-label{color:var(--muted2);width:80px;flex-shrink:0}
+
+/* 导出按钮 */
+.action-bar{display:flex;gap:10px;margin-bottom:16px}
+.btn-export{border:1.5px solid var(--ok);color:var(--ok);background:var(--ok-bg);border-radius:var(--radius);padding:8px 18px;font-size:13px;font-weight:500;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:6px}
+.btn-export:hover{background:var(--ok);color:#fff}
+
+/* 历史表 */
+.history-table th,.history-table td{padding:10px 14px}
+
+/* 只读声明 Banner */
+.readonly-banner{background:var(--ok-bg);border:1px solid #86efac;border-radius:var(--radius);padding:10px 14px;display:flex;align-items:center;gap:10px;margin-bottom:16px;font-size:12px;color:#166534}
+.readonly-banner .ico{font-size:18px;flex-shrink:0}
+
+/* 占位页 */
+#screen-pool{flex:1;display:flex;align-items:center;justify-content:center}
+.pool-center{text-align:center;max-width:480px;padding:40px}
+.pool-badge{display:inline-flex;align-items:center;gap:6px;background:var(--info-bg);color:var(--info);font-size:12px;padding:4px 14px;border-radius:20px;font-weight:600;margin-bottom:16px}
+.pool-center h2{font-size:20px;font-weight:700;margin-bottom:8px}
+.pool-center p{color:var(--muted);font-size:13px;line-height:1.7}
+.pool-checklist{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-top:20px;text-align:left}
+.pool-checklist h4{font-size:13px;font-weight:600;margin-bottom:10px;color:var(--muted)}
+.pool-checklist li{font-size:13px;color:var(--text);margin-bottom:6px;padding-left:4px;list-style:none;display:flex;gap:8px}
+.pool-checklist li::before{content:"○";color:var(--muted2)}
+
+/* 分页 */
+.pagination{display:flex;align-items:center;justify-content:flex-end;gap:8px;margin-top:12px;font-size:13px;color:var(--muted)}
+.btn-page{border:1px solid var(--border2);border-radius:4px;padding:4px 10px;cursor:pointer;background:var(--card);color:var(--text);transition:all .15s}
+.btn-page:hover{border-color:var(--brand);color:var(--brand)}
+.btn-page:disabled{opacity:.4;cursor:not-allowed}
+
+/* 加载遮罩 */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;z-index:1000}
+.overlay-box{background:#fff;border-radius:12px;padding:32px 40px;text-align:center;box-shadow:var(--shadow-md)}
+.spinner{width:36px;height:36px;border:4px solid var(--border2);border-top-color:var(--brand);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 12px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Toast */
+.toast{position:fixed;bottom:24px;right:24px;background:#1e293b;color:#f1f5f9;padding:12px 20px;border-radius:var(--radius);font-size:13px;z-index:2000;box-shadow:var(--shadow-md);transform:translateY(80px);opacity:0;transition:all .3s}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.success{background:var(--ok)}
+.toast.error{background:var(--alert)}
+</style>
+</head>
+<body>
+
+<!-- ══ 登录页 ══════════════════════════════════════════════════════════════ -->
+<div id="screen-login">
+  <div class="login-card">
+    <div class="login-logo">
+      <h1>华辰精密制造</h1>
+      <p>HR 智能工作台</p>
+      <span class="login-badge">🔒 内网运行</span>
+    </div>
+    <div class="form-group">
+      <label>用户名</label>
+      <input id="inp-user" type="text" placeholder="请输入用户名" value="hr01" autocomplete="username">
+    </div>
+    <div class="form-group">
+      <label>密码</label>
+      <input id="inp-pass" type="password" placeholder="请输入密码" value="hr123456" autocomplete="current-password">
+    </div>
+    <p id="login-error" class="error-msg"></p>
+    <button class="btn-primary" onclick="doLogin()">登录</button>
+    <p class="login-hint">hr01/hr123456 · fin01/fin123456 · admin/admin888</p>
+  </div>
+</div>
+
+<!-- ══ 主界面 ════════════════════════════════════════════════════════════== -->
+<div id="screen-main" class="hidden">
+
+  <!-- 左侧 Rail -->
+  <nav class="rail">
+    <div class="rail-brand">
+      <h2>华辰精密制造<br>HR 智能工作台</h2>
+      <div class="rail-status"><span class="dot"></span><span>内网运行</span></div>
+    </div>
+    <div class="rail-section">一期模块</div>
+    <div class="rail-item active" id="nav-payroll" onclick="activateModule('payroll_recon')">
+      <span class="rail-icon">⚖️</span>薪资对账
+    </div>
+    <div class="rail-section">后续需求池</div>
+    <div class="rail-item pool-item" onclick="showPool('合同到期预警')"><span class="rail-icon">📋</span>合同到期预警</div>
+    <div class="rail-item pool-item" onclick="showPool('花名册校验')"><span class="rail-icon">👥</span>花名册校验</div>
+    <div class="rail-item pool-item" onclick="showPool('考勤统计')"><span class="rail-icon">⏰</span>考勤统计</div>
+    <div class="rail-item pool-item" onclick="showPool('社保公积金核对')"><span class="rail-icon">🏦</span>社保公积金核对</div>
+    <div class="rail-item pool-item" onclick="showPool('个税代扣核对')"><span class="rail-icon">🧾</span>个税代扣核对</div>
+    <div class="rail-item pool-item" onclick="showPool('招聘漏斗分析')"><span class="rail-icon">📊</span>招聘漏斗分析</div>
+    <div class="rail-item pool-item" onclick="showPool('人员成本分析')"><span class="rail-icon">💰</span>人员成本分析</div>
+    <div class="rail-item pool-item" onclick="showPool('绩效考核汇总')"><span class="rail-icon">🎯</span>绩效考核汇总</div>
+    <div class="rail-item pool-item" onclick="showPool('培训学时统计')"><span class="rail-icon">📚</span>培训学时统计</div>
+    <div class="rail-item pool-item" onclick="showPool('离职率分析')"><span class="rail-icon">📉</span>离职率分析</div>
+    <div class="rail-item pool-item" onclick="showPool('加班费核算')"><span class="rail-icon">🕐</span>加班费核算</div>
+    <div class="rail-footer">
+      <div class="rail-user">
+        <span id="rail-username">用户</span>
+        <button class="btn-logout" onclick="doLogout()">退出</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- 主内容区 -->
+  <div class="main-content" id="main-panel">
+    <div class="topbar">
+      <h3 id="topbar-title">薪资对账</h3>
+    </div>
+    <div class="content-body">
+
+      <!-- 步骤条 -->
+      <div class="steps">
+        <div class="step active" id="step-tab-1" onclick="goStep(1)">
+          <span class="step-num">1</span>上传与核对
+        </div>
+        <div class="step" id="step-tab-2" onclick="goStep(2)">
+          <span class="step-num">2</span>结果与差异
+        </div>
+        <div class="step" id="step-tab-3" onclick="goStep(3)">
+          <span class="step-num">3</span>历史作业
+        </div>
+      </div>
+
+      <!-- 步骤一：上传 -->
+      <div id="step-1">
+        <div class="upload-grid">
+          <div>
+            <p style="font-weight:600;margin-bottom:8px;font-size:13px;color:var(--muted)">工资表</p>
+            <div class="dropzone" id="drop-payroll"
+              ondragover="ev.preventDefault();this.classList.add('drag-over')"
+              ondragleave="this.classList.remove('drag-over')"
+              ondrop="handleDrop(event,'payroll')"
+              onclick="document.getElementById('file-payroll').click()">
+              <div class="dropzone-icon">📊</div>
+              <div class="dropzone-label">点击选择或拖拽</div>
+              <div class="dropzone-hint">薪资主表 · 实发合计列</div>
+              <div class="dropzone-hint" style="color:var(--muted2);margin-top:2px">别名：实发工资 / 实发合计</div>
+              <div class="dropzone-file" id="file-payroll-name"></div>
+              <input type="file" id="file-payroll" accept=".xlsx,.xls" style="display:none"
+                onchange="handleFileInput(event,'payroll')">
+            </div>
+          </div>
+          <div>
+            <p style="font-weight:600;margin-bottom:8px;font-size:13px;color:var(--muted)">银行代发明细</p>
+            <div class="dropzone" id="drop-bank"
+              ondragover="event.preventDefault();this.classList.add('drag-over')"
+              ondragleave="this.classList.remove('drag-over')"
+              ondrop="handleDrop(event,'bank')"
+              onclick="document.getElementById('file-bank').click()">
+              <div class="dropzone-icon">🏦</div>
+              <div class="dropzone-label">点击选择或拖拽</div>
+              <div class="dropzone-hint">银行代发明细 · 实发金额列</div>
+              <div class="dropzone-hint" style="color:var(--muted2);margin-top:2px">别名：实发金额 / 代发金额</div>
+              <div class="dropzone-file" id="file-bank-name"></div>
+              <input type="file" id="file-bank" accept=".xlsx,.xls" style="display:none"
+                onchange="handleFileInput(event,'bank')">
+            </div>
+          </div>
+        </div>
+
+        <div class="period-row">
+          <label>核对期间</label>
+          <input type="month" id="inp-period" style="font-size:13px">
+        </div>
+
+        <div class="policy-box">
+          <h4>📌 核对口径说明</h4>
+          <div class="policy-item"><span class="badge-ok">✓ 已确认</span>工号优先匹配；工号缺失的行归入单边缺失</div>
+          <div class="policy-item"><span class="badge-ok">✓ 已确认</span>差额方向固定为"银行 − 工资表"（负值=银行少发）</div>
+          <div class="policy-item"><span class="badge-warn">⚠ 待确认</span>金额容差、小数位、四舍五入口径（默认：精确匹配，2位小数）</div>
+          <div class="policy-item"><span class="badge-warn">⚠ 待确认</span>同名员工处理规则（默认：重复工号阻断，转人工确认）</div>
+        </div>
+
+        <button class="btn-run" id="btn-run" onclick="startReconcile()" disabled>
+          ▶ 开始核对
+        </button>
+        <p style="color:var(--muted2);font-size:12px;margin-top:8px">请先上传两个文件</p>
+      </div>
+
+      <!-- 步骤二：结果 -->
+      <div id="step-2" class="hidden">
+        <div class="readonly-banner">
+          <span class="ico">🔒</span>
+          <span id="readonly-info">原文件只读，SHA-256 校验通过 · 系统未写回或修改任何原始文件</span>
+        </div>
+        <div class="stat-grid">
+          <div class="stat-card ok"><div class="stat-num" id="stat-match">—</div><div class="stat-label">✅ 一致</div></div>
+          <div class="stat-card alert"><div class="stat-num" id="stat-diff">—</div><div class="stat-label">🔴 金额不符</div></div>
+          <div class="stat-card warn-l"><div class="stat-num" id="stat-p">—</div><div class="stat-label">🟡 工资表有银行无</div></div>
+          <div class="stat-card warn-r"><div class="stat-num" id="stat-b">—</div><div class="stat-label">🟠 银行有工资表无</div></div>
+        </div>
+
+        <div class="action-bar">
+          <button class="btn-export" id="btn-export" onclick="exportResult()">⬇ 导出 Excel</button>
+        </div>
+
+        <div class="card">
+          <div class="filter-bar">
+            <span class="pill active" data-f="" onclick="setFilter(this,'')">全部</span>
+            <span class="pill" data-f="amount_diff,payroll_only,bank_only" onclick="setFilter(this,'amount_diff,payroll_only,bank_only')">仅差异</span>
+            <span class="pill" data-f="match" onclick="setFilter(this,'match')">一致</span>
+            <span class="pill" data-f="amount_diff" onclick="setFilter(this,'amount_diff')">金额不符</span>
+            <span class="pill" data-f="payroll_only" onclick="setFilter(this,'payroll_only')">工资表有银行无</span>
+            <span class="pill" data-f="bank_only" onclick="setFilter(this,'bank_only')">银行有工资表无</span>
+            <div class="search-box">
+              <span class="ico">🔍</span>
+              <input type="text" placeholder="工号 / 姓名" id="inp-search"
+                oninput="onSearch()" style="padding-left:28px">
+            </div>
+          </div>
+          <div class="result-table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>工号</th><th>姓名</th><th>部门</th><th>对账结果</th>
+                  <th>工资表实发</th><th>银行代发</th><th>差额（银行-工资表）</th>
+                </tr>
+              </thead>
+              <tbody id="result-tbody"></tbody>
+            </table>
+            <div id="result-no-data" class="no-data hidden">暂无匹配数据</div>
+          </div>
+          <div class="pagination">
+            <span id="page-info">—</span>
+            <button class="btn-page" id="btn-prev" onclick="changePage(-1)" disabled>‹ 上一页</button>
+            <button class="btn-page" id="btn-next" onclick="changePage(1)" disabled>下一页 ›</button>
+          </div>
+        </div>
+
+        <div class="audit-card" id="audit-card">
+          <h4>🔍 作业追溯</h4>
+          <div class="audit-item"><span class="audit-label">作业 ID</span><span id="audit-id">—</span></div>
+          <div class="audit-item"><span class="audit-label">操作人</span><span id="audit-user">—</span></div>
+          <div class="audit-item"><span class="audit-label">核对时间</span><span id="audit-time">—</span></div>
+          <div class="audit-item"><span class="audit-label">核对期间</span><span id="audit-period">—</span></div>
+          <div class="audit-item"><span class="audit-label">工资表文件</span><span id="audit-pfile">—</span></div>
+          <div class="audit-item"><span class="audit-label">银行文件</span><span id="audit-bfile">—</span></div>
+          <div class="audit-item"><span class="audit-label">文件只读</span><span id="audit-readonly">—</span></div>
+        </div>
+      </div>
+
+      <!-- 步骤三：历史 -->
+      <div id="step-3" class="hidden">
+        <div class="card">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+            <h4 style="font-size:15px;font-weight:600">历史作业</h4>
+            <button class="btn-export" onclick="loadHistory()">🔄 刷新</button>
+          </div>
+          <div class="result-table-wrap">
+            <table class="history-table">
+              <thead>
+                <tr>
+                  <th>核对时间</th><th>核对期间</th><th>操作人</th>
+                  <th>一致</th><th>金额不符</th><th>工资表有银行无</th><th>银行有工资表无</th>
+                  <th>操作</th>
+                </tr>
+              </thead>
+              <tbody id="history-tbody"></tbody>
+            </table>
+            <div id="history-no-data" class="no-data hidden">暂无历史记录</div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- content-body -->
+  </div><!-- main-content -->
+
+  <!-- 需求池占位 -->
+  <div id="screen-pool" class="hidden" style="flex:1;min-height:100vh;align-items:center;justify-content:center;display:none">
+    <div class="pool-center">
+      <div class="pool-badge">后续需求池 · 一期不交付</div>
+      <h2 id="pool-module-name">模块名称</h2>
+      <p>该模块已纳入后续需求池，将在一期薪资对账功能验收完成后，按优先级迭代实现。</p>
+      <div class="pool-checklist">
+        <h4>开工前需要谈清楚的四件事</h4>
+        <ul>
+          <li>要哪些表？（数据来源与字段格式）</li>
+          <li>怎么算？（业务规则与口径定义）</li>
+          <li>出什么？（输出格式与导出方式）</li>
+          <li>谁能用？（角色权限与审批流程）</li>
+        </ul>
+      </div>
+      <button onclick="activateModule('payroll_recon')" style="margin-top:20px;background:var(--brand);color:#fff;border:none;border-radius:var(--radius);padding:9px 20px;cursor:pointer;font-size:13px">← 返回薪资对账</button>
+    </div>
+  </div>
+
+</div><!-- screen-main -->
+
+<!-- 加载遮罩 -->
+<div class="overlay hidden" id="overlay">
+  <div class="overlay-box">
+    <div class="spinner"></div>
+    <p id="overlay-msg" style="color:var(--muted);font-size:13px">处理中，请稍候…</p>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ── 状态 ────────────────────────────────────────────────────────────────────
+const S = {
+  token: null,
+  username: null,
+  displayName: null,
+  currentJobId: null,
+  currentFilter: '',
+  currentPage: 1,
+  pageSize: 50,
+  totalRows: 0,
+  searchTimer: null,
+};
+
+// ── 工具函数 ─────────────────────────────────────────────────────────────────
+async function api(method, path, body, isFile) {
+  const opts = {
+    method,
+    headers: { Authorization: `Bearer ${S.token}` },
+  };
+  if (isFile) {
+    opts.body = body;
+  } else if (body) {
+    opts.headers['Content-Type'] = 'application/json';
+    opts.body = JSON.stringify(body);
+  }
+  const res = await fetch(path, opts);
+  if (res.status === 401) { doLogout(); throw new Error('UNAUTHENTICATED'); }
+  return res;
+}
+
+function showToast(msg, type = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = `toast ${type} show`;
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+function showOverlay(msg = '处理中，请稍候…') {
+  document.getElementById('overlay-msg').textContent = msg;
+  document.getElementById('overlay').classList.remove('hidden');
+}
+function hideOverlay() { document.getElementById('overlay').classList.add('hidden'); }
+
+function el(id) { return document.getElementById(id); }
+
+// ── 认证 ─────────────────────────────────────────────────────────────────────
+async function doLogin() {
+  const username = el('inp-user').value.trim();
+  const password = el('inp-pass').value.trim();
+  el('login-error').textContent = '';
+  if (!username || !password) { el('login-error').textContent = '请输入用户名和密码'; return; }
+
+  showOverlay('登录中…');
+  try {
+    const res = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password }),
+    });
+    const data = await res.json();
+    if (!res.ok) { el('login-error').textContent = data.message || '登录失败'; return; }
+    S.token = data.access_token;
+    S.username = data.username;
+    S.displayName = data.display_name;
+    el('rail-username').textContent = data.display_name;
+    el('screen-login').classList.add('hidden');
+    el('screen-main').classList.remove('hidden');
+    goStep(1);
+  } catch (e) {
+    el('login-error').textContent = '网络错误，请检查服务是否启动';
+  } finally {
+    hideOverlay();
+  }
+}
+
+function doLogout() {
+  S.token = null; S.username = null; S.currentJobId = null;
+  el('screen-main').classList.add('hidden');
+  el('screen-login').classList.remove('hidden');
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !el('screen-login').classList.contains('hidden')) doLogin();
+});
+
+// ── 模块切换 ─────────────────────────────────────────────────────────────────
+function activateModule(key) {
+  el('main-panel').classList.remove('hidden');
+  el('screen-pool').style.display = 'none';
+  document.querySelectorAll('.rail-item').forEach(i => i.classList.remove('active'));
+  if (key === 'payroll_recon') {
+    el('nav-payroll').classList.add('active');
+    el('topbar-title').textContent = '薪资对账';
+    goStep(1);
+  }
+}
+
+function showPool(name) {
+  document.querySelectorAll('.rail-item').forEach(i => i.classList.remove('active'));
+  el('main-panel').classList.add('hidden');
+  const pool = el('screen-pool');
+  pool.style.display = 'flex';
+  el('pool-module-name').textContent = name;
+}
+
+// ── 步骤切换 ─────────────────────────────────────────────────────────────────
+function goStep(n) {
+  [1, 2, 3].forEach(i => {
+    el(`step-${i}`).classList.toggle('hidden', i !== n);
+    const tab = el(`step-tab-${i}`);
+    tab.classList.remove('active', 'done');
+    if (i === n) tab.classList.add('active');
+    else if (i < n) tab.classList.add('done');
+  });
+  if (n === 3) loadHistory();
+}
+
+// ── 文件上传 ─────────────────────────────────────────────────────────────────
+const FILES = { payroll: null, bank: null };
+
+function handleDrop(ev, slot) {
+  ev.preventDefault();
+  el(`drop-${slot}`).classList.remove('drag-over');
+  const file = ev.dataTransfer.files[0];
+  if (file) acceptFile(slot, file);
+}
+
+function handleFileInput(ev, slot) {
+  const file = ev.target.files[0];
+  if (file) acceptFile(slot, file);
+}
+
+function acceptFile(slot, file) {
+  if (!file.name.match(/\.(xlsx|xls)$/i)) { showToast('仅支持 Excel 文件（.xlsx / .xls）', 'error'); return; }
+  FILES[slot] = file;
+  const drop = el(`drop-${slot}`);
+  drop.classList.add('uploaded');
+  el(`file-${slot}-name`).textContent = '✓ ' + file.name;
+  checkReady();
+}
+
+function checkReady() {
+  const ready = FILES.payroll && FILES.bank;
+  el('btn-run').disabled = !ready;
+  el('btn-run').nextElementSibling.classList.toggle('hidden', ready);
+}
+
+// ── 发起核对 ─────────────────────────────────────────────────────────────────
+async function startReconcile() {
+  if (!FILES.payroll || !FILES.bank) return;
+  showOverlay('正在核对，请稍候…');
+  const fd = new FormData();
+  fd.append('payroll_file', FILES.payroll);
+  fd.append('bank_file', FILES.bank);
+  const period = el('inp-period').value;
+  if (period) fd.append('period', period);
+
+  try {
+    const res = await api('POST', '/api/jobs', fd, true);
+    const data = await res.json();
+    if (!res.ok) {
+      showToast(data.message || '核对失败，请检查文件格式', 'error');
+      return;
+    }
+    S.currentJobId = data.id;
+    S.currentPage = 1;
+    S.currentFilter = '';
+    renderResult(data);
+    goStep(2);
+    showToast('核对完成！', 'success');
+  } catch (e) {
+    showToast('请求失败：' + e.message, 'error');
+  } finally {
+    hideOverlay();
+  }
+}
+
+// ── 渲染结果 ─────────────────────────────────────────────────────────────────
+function renderResult(job) {
+  const s = job.summary || {};
+  el('stat-match').textContent = s.match ?? 0;
+  el('stat-diff').textContent = s.amount_diff ?? 0;
+  el('stat-p').textContent = s.payroll_only ?? 0;
+  el('stat-b').textContent = s.bank_only ?? 0;
+
+  // 审计卡
+  el('audit-id').textContent = job.id ? job.id.slice(0, 8) + '…' : '—';
+  el('audit-user').textContent = job.created_by || S.displayName || S.username;
+  el('audit-time').textContent = job.created_at || '—';
+  el('audit-period').textContent = job.period || '未指定';
+  const files = job.files || [];
+  const pf = files.find(f => f.side === 'payroll');
+  const bf = files.find(f => f.side === 'bank');
+  el('audit-pfile').textContent = pf ? pf.original_name : '—';
+  el('audit-bfile').textContent = bf ? bf.original_name : '—';
+  const verified = files.every(f => f.readonly_verified);
+  el('audit-readonly').textContent = verified ? '✅ SHA-256 校验通过，文件未被修改' : '⚠️ 校验异常';
+
+  // 重置筛选
+  document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+  document.querySelector('.pill[data-f=""]').classList.add('active');
+  el('inp-search').value = '';
+  loadRows();
+}
+
+async function loadRows() {
+  if (!S.currentJobId) return;
+  const params = new URLSearchParams({
+    page: S.currentPage,
+    page_size: S.pageSize,
+  });
+  const kw = el('inp-search').value.trim();
+  if (kw) params.append('keyword', kw);
+  if (S.currentFilter) {
+    S.currentFilter.split(',').forEach(c => params.append('category', c));
+  }
+
+  const res = await api('GET', `/api/jobs/${S.currentJobId}/rows?${params}`);
+  const data = await res.json();
+  S.totalRows = data.total || 0;
+  renderTable(data.items || []);
+  renderPagination();
+}
+
+const CAT_LABEL = {
+  match: '<span class="cat-badge cat-match">✅ 一致</span>',
+  amount_diff: '<span class="cat-badge cat-diff">🔴 金额不符</span>',
+  payroll_only: '<span class="cat-badge cat-payroll">🟡 工资表有银行无</span>',
+  bank_only: '<span class="cat-badge cat-bank">🟠 银行有工资表无</span>',
+};
+const ROW_CLS = { match: 'row-match', amount_diff: 'row-alert', payroll_only: 'row-warn', bank_only: 'row-warn' };
+
+function renderTable(rows) {
+  const tbody = el('result-tbody');
+  if (!rows.length) {
+    tbody.innerHTML = '';
+    el('result-no-data').classList.remove('hidden');
+    return;
+  }
+  el('result-no-data').classList.add('hidden');
+  tbody.innerHTML = rows.map(r => {
+    const delta = r.delta
+      ? `<span class="${parseFloat(r.delta) < 0 ? 'delta-neg' : 'delta-pos'}">${r.delta}</span>`
+      : '—';
+    return `<tr class="${ROW_CLS[r.category] || ''}">
+      <td>${esc(r.match_key || '')}</td>
+      <td>${esc(r.name || '')}</td>
+      <td>${esc(r.dept || '')}</td>
+      <td>${CAT_LABEL[r.category] || r.category}</td>
+      <td>${esc(r.payroll_amount || '—')}</td>
+      <td>${esc(r.bank_amount || '—')}</td>
+      <td>${delta}</td>
+    </tr>`;
+  }).join('');
+}
+
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function renderPagination() {
+  const total = S.totalRows;
+  const pages = Math.ceil(total / S.pageSize) || 1;
+  el('page-info').textContent = `共 ${total} 条，第 ${S.currentPage}/${pages} 页`;
+  el('btn-prev').disabled = S.currentPage <= 1;
+  el('btn-next').disabled = S.currentPage >= pages;
+}
+
+function changePage(dir) {
+  S.currentPage += dir;
+  loadRows();
+}
+
+// ── 筛选 / 搜索 ──────────────────────────────────────────────────────────────
+function setFilter(el_pill, filter) {
+  S.currentFilter = filter;
+  S.currentPage = 1;
+  document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+  el_pill.classList.add('active');
+  loadRows();
+}
+
+function onSearch() {
+  clearTimeout(S.searchTimer);
+  S.searchTimer = setTimeout(() => { S.currentPage = 1; loadRows(); }, 300);
+}
+
+// ── 导出 ─────────────────────────────────────────────────────────────────────
+async function exportResult() {
+  if (!S.currentJobId) return;
+  const res = await api('GET', `/api/jobs/${S.currentJobId}/export`);
+  if (!res.ok) { showToast('导出失败', 'error'); return; }
+  const blob = await res.blob();
+  const cd = res.headers.get('Content-Disposition') || '';
+  const m = cd.match(/filename\*?=(?:UTF-8'')?["']?([^"';\r\n]+)/i);
+  let filename = m ? decodeURIComponent(m[1]) : '薪资对账.xlsx';
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename; a.click();
+  URL.revokeObjectURL(url);
+  showToast('导出成功', 'success');
+}
+
+// ── 历史 ─────────────────────────────────────────────────────────────────────
+async function loadHistory() {
+  const res = await api('GET', '/api/jobs?page_size=50');
+  const data = await res.json();
+  const items = data.items || [];
+  const tbody = el('history-tbody');
+  el('history-no-data').classList.toggle('hidden', items.length > 0);
+  tbody.innerHTML = items.map(j => {
+    const s = j.summary || {};
+    return `<tr>
+      <td>${j.created_at || '—'}</td>
+      <td>${j.period || '—'}</td>
+      <td>${j.created_by || '—'}</td>
+      <td style="color:var(--ok);font-weight:600">${s.match ?? '—'}</td>
+      <td style="color:var(--alert);font-weight:600">${s.amount_diff ?? '—'}</td>
+      <td style="color:var(--warn);font-weight:600">${s.payroll_only ?? '—'}</td>
+      <td style="color:#b45309;font-weight:600">${s.bank_only ?? '—'}</td>
+      <td><button onclick="viewJob('${j.id}')" style="border:1px solid var(--brand);color:var(--brand);background:none;border-radius:4px;padding:3px 10px;cursor:pointer;font-size:12px">查看</button>
+          <button onclick="exportJobById('${j.id}')" style="border:1px solid var(--ok);color:var(--ok);background:none;border-radius:4px;padding:3px 10px;cursor:pointer;font-size:12px;margin-left:4px">导出</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+async function viewJob(jobId) {
+  const res = await api('GET', `/api/jobs/${jobId}`);
+  const data = await res.json();
+  S.currentJobId = jobId;
+  S.currentPage = 1;
+  S.currentFilter = '';
+  renderResult(data);
+  goStep(2);
+}
+
+async function exportJobById(jobId) {
+  const oldId = S.currentJobId;
+  S.currentJobId = jobId;
+  await exportResult();
+  S.currentJobId = oldId;
+}
+</script>
+</body>
+</html>
