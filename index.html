@@ -1,0 +1,825 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>HR 智能工作台 · 原型 · 华辰精密制造</title>
+<style>
+/* ===================== 设计令牌 ===================== */
+:root {
+  color-scheme: light;
+  --paper:    #F4F6FA;
+  --surface:  #FAFBFD;
+  --raised:   #FFFFFF;
+  --sunk:     #EDF0F7;
+  --ink:      #232838;
+  --ink2:     #5A6178;
+  --ink3:     #8A91A6;
+  --rule:     #E3E7F0;
+  --rule-soft:#EFF2F8;
+
+  --brand:      #4C6FD0;
+  --brand-soft: #E9EFFC;
+  --brand-line: #BFD2F5;
+  --on-brand:   #FFFFFF;
+
+  --ok:         #3E8E6E; --ok-soft:    #E4F3EC; --ok-line:    #AEDCC7;
+  --alert:      #C4566A; --alert-soft: #FBEAEE; --alert-line: #F0B9C4;
+  --warn:       #AF7A2C; --warn-soft:  #FAF0DC; --warn-line:  #E9CE9C;
+  --info:       #6A6F91; --info-soft:  #F0F1F7; --info-line:  #C9CCDE;
+
+  --shadow-sm: 0 1px 2px rgba(35,40,56,.05);
+  --shadow:    0 1px 3px rgba(35,40,56,.05), 0 8px 20px -14px rgba(35,40,56,.22);
+  --r-sm: 8px; --r: 12px; --r-lg: 16px;
+}
+
+/* ===================== 重置 & 基础 ===================== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; font-family: system-ui, "Microsoft YaHei UI", "PingFang SC", sans-serif; font-size: 14px; background: var(--paper); color: var(--ink); line-height: 1.6; }
+button { cursor: pointer; font: inherit; border: none; background: none; }
+input { font: inherit; }
+a { color: var(--brand); text-decoration: none; }
+.hidden { display: none !important; }
+
+/* ===================== 通用组件 ===================== */
+.chip {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 500;
+}
+.chip.ok    { background: var(--ok-soft);    color: var(--ok);    border: 1px solid var(--ok-line); }
+.chip.alert { background: var(--alert-soft); color: var(--alert); border: 1px solid var(--alert-line); }
+.chip.warn  { background: var(--warn-soft);  color: var(--warn);  border: 1px solid var(--warn-line); }
+.chip.info  { background: var(--info-soft);  color: var(--info);  border: 1px solid var(--info-line); }
+.chip.brand { background: var(--brand-soft); color: var(--brand); border: 1px solid var(--brand-line); }
+.chip.pending { background: var(--warn-soft); color: var(--warn); border: 1px dashed var(--warn-line); font-size: 11px; }
+.dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 7px 16px; border-radius: var(--r-sm); font-size: 13px; font-weight: 500;
+  border: 1px solid var(--rule); background: var(--raised); color: var(--ink);
+  transition: background .15s, border-color .15s;
+}
+.btn:hover { background: var(--sunk); }
+.btn.pri { background: var(--brand); color: var(--on-brand); border-color: var(--brand); }
+.btn.pri:hover { background: #3d5fb8; border-color: #3d5fb8; }
+.btn:disabled { opacity: .45; cursor: not-allowed; }
+.btn.sm { padding: 5px 12px; font-size: 12px; }
+
+.card { background: var(--raised); border: 1px solid var(--rule); border-radius: var(--r); box-shadow: var(--shadow-sm); }
+.card .hd { display: flex; align-items: center; gap: 8px; padding: 14px 18px; border-bottom: 1px solid var(--rule-soft); font-weight: 600; }
+.card .bd { padding: 16px 18px; }
+
+.alert-box { display: flex; gap: 10px; padding: 14px 16px; border-radius: var(--r-sm); border: 1px solid; }
+.alert-box .ico { font-style: normal; font-size: 15px; flex-shrink: 0; margin-top: 1px; }
+.alert-box .body .ttl { font-weight: 600; margin-bottom: 4px; }
+.alert-box.note  { background: var(--info-soft);  color: var(--info);  border-color: var(--info-line); }
+.alert-box.ok    { background: var(--ok-soft);    color: var(--ok);    border-color: var(--ok-line); }
+.alert-box.warn  { background: var(--warn-soft);  color: var(--warn);  border-color: var(--warn-line); }
+
+.kv { display: grid; grid-template-columns: auto 1fr; gap: 4px 16px; font-size: 13px; }
+.kv dt { color: var(--ink3); font-weight: 500; white-space: nowrap; }
+.kv dd { color: var(--ink); }
+
+/* ===================== 登录页 ===================== */
+#login {
+  min-height: 100%; display: flex; align-items: center; justify-content: center;
+  padding: 24px; background: linear-gradient(135deg, #f0f4ff 0%, #fafbfd 60%);
+}
+.login-card {
+  width: 100%; max-width: 400px;
+  background: var(--raised); border-radius: var(--r-lg); box-shadow: var(--shadow); padding: 36px 32px;
+}
+.login-card .brand-row { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 28px; }
+.login-card h2 { font-size: 20px; font-weight: 700; }
+.login-card .sub { font-size: 13px; color: var(--ink2); margin-top: 2px; }
+.field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 14px; }
+.field label { font-size: 13px; font-weight: 500; color: var(--ink2); }
+.field input {
+  padding: 9px 12px; border: 1px solid var(--rule); border-radius: var(--r-sm);
+  background: var(--surface); color: var(--ink); transition: border-color .15s;
+  outline: none;
+}
+.field input:focus { border-color: var(--brand); box-shadow: 0 0 0 3px var(--brand-soft); }
+.demo-accts { margin-top: 20px; padding: 12px 14px; background: var(--sunk); border-radius: var(--r-sm); font-size: 12px; color: var(--ink2); }
+.demo-accts .lbl { font-weight: 600; margin-bottom: 6px; color: var(--ink3); }
+.demo-accts p { display: flex; justify-content: space-between; padding: 2px 0; }
+.demo-accts code { font-family: "Cascadia Code", "Consolas", monospace; color: var(--brand); font-size: 12px; }
+
+/* ===================== 主界面框架 ===================== */
+#app { display: flex; flex-direction: column; height: 100%; }
+.appbar {
+  display: flex; align-items: center; gap: 10px; padding: 0 20px; height: 48px;
+  background: var(--raised); border-bottom: 1px solid var(--rule); flex-shrink: 0;
+  font-size: 13px; font-weight: 500; color: var(--ink2);
+}
+.appbar b { color: var(--ink); font-size: 14px; }
+.appbar .sep { color: var(--rule); }
+.appbar .grow { flex: 1; }
+.appbar .acts { display: flex; gap: 8px; }
+
+.shell { display: flex; flex: 1; overflow: hidden; }
+
+/* ===================== 侧边导航 ===================== */
+.rail {
+  width: 220px; flex-shrink: 0; background: var(--raised); border-right: 1px solid var(--rule);
+  display: flex; flex-direction: column; overflow-y: auto;
+}
+.rail .brand-block { padding: 18px 16px; border-bottom: 1px solid var(--rule-soft); }
+.rail .brand-block .co { font-size: 11px; color: var(--ink3); font-weight: 500; letter-spacing: .5px; text-transform: uppercase; }
+.rail .brand-block .nm { font-size: 14px; font-weight: 700; color: var(--ink); margin: 2px 0; }
+.rail .brand-block .env { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--ok); }
+.rail .brand-block .env .dot { background: var(--ok); width: 5px; height: 5px; }
+
+.navsec { padding: 12px 0 4px; }
+.navlbl { padding: 0 16px 6px; font-size: 11px; font-weight: 600; color: var(--ink3); letter-spacing: .5px; text-transform: uppercase; }
+.navitem {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 16px; font-size: 13px; color: var(--ink2);
+  cursor: pointer; border-radius: 0; transition: background .12s;
+  border: none; background: none; width: 100%; text-align: left;
+}
+.navitem:hover { background: var(--sunk); color: var(--ink); }
+.navitem.active { background: var(--brand-soft); color: var(--brand); font-weight: 600; }
+.navitem.pool { color: var(--ink3); font-size: 12px; padding: 6px 16px; }
+.navitem.pool:hover { background: var(--sunk); color: var(--ink2); }
+.navitem .ico { width: 16px; text-align: center; flex-shrink: 0; }
+.rail-foot { margin-top: auto; padding: 16px; font-size: 11px; color: var(--ink3); line-height: 1.5; border-top: 1px solid var(--rule-soft); }
+
+/* ===================== 主内容区 ===================== */
+.stage { flex: 1; overflow-y: auto; display: flex; flex-direction: column; }
+.topbar { display: flex; align-items: center; gap: 10px; padding: 18px 28px 0; }
+.topbar h1 { font-size: 18px; font-weight: 700; }
+.topbar .grow { flex: 1; }
+
+.content { padding: 20px 28px; display: flex; flex-direction: column; gap: 16px; }
+
+/* ===================== 步骤条 ===================== */
+.steps { display: flex; gap: 0; background: var(--raised); border: 1px solid var(--rule); border-radius: var(--r); overflow: hidden; }
+.step-btn {
+  flex: 1; padding: 12px 8px; text-align: center; font-size: 13px; font-weight: 500;
+  color: var(--ink3); border: none; background: none; cursor: pointer;
+  border-right: 1px solid var(--rule); transition: background .12s, color .12s;
+  position: relative;
+}
+.step-btn:last-child { border-right: none; }
+.step-btn:hover { background: var(--sunk); color: var(--ink); }
+.step-btn.active { background: var(--brand-soft); color: var(--brand); font-weight: 600; }
+.step-btn:disabled { opacity: .4; cursor: not-allowed; }
+
+/* ===================== 上传区 ===================== */
+.upload-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.dropzone {
+  border: 2px dashed var(--rule); border-radius: var(--r); padding: 28px 20px;
+  text-align: center; cursor: pointer; transition: border-color .15s, background .15s;
+  background: var(--surface); display: flex; flex-direction: column; align-items: center; gap: 8px;
+}
+.dropzone:hover, .dropzone.drag { border-color: var(--brand); background: var(--brand-soft); }
+.dropzone.ready { border-color: var(--ok); border-style: solid; background: var(--ok-soft); }
+.dropzone .dz-icon { font-size: 28px; line-height: 1; }
+.dropzone .dz-label { font-weight: 600; font-size: 13px; }
+.dropzone .dz-sub { font-size: 12px; color: var(--ink3); }
+.dropzone .dz-aliases { font-size: 11px; color: var(--ink3); margin-top: 2px; }
+.dropzone .dz-file { font-size: 12px; color: var(--ok); font-weight: 500; margin-top: 4px; }
+.dropzone input[type=file] { display: none; }
+
+/* ===================== 口径说明 ===================== */
+.criteria-list { display: flex; flex-direction: column; gap: 8px; }
+.criteria-item { display: flex; align-items: flex-start; gap: 10px; font-size: 13px; }
+.criteria-item .ci-label { font-weight: 500; min-width: 90px; color: var(--ink); }
+.criteria-item .ci-val { color: var(--ink2); }
+.ci-confirmed { color: var(--ok); font-weight: 600; }
+.ci-pending { color: var(--warn); font-weight: 600; display: flex; align-items: center; gap: 4px; }
+.ci-ref { font-size: 11px; color: var(--ink3); margin-left: 4px; }
+
+/* ===================== 统计卡 ===================== */
+.stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.stat-card {
+  background: var(--raised); border: 1px solid var(--rule); border-radius: var(--r);
+  padding: 16px; display: flex; flex-direction: column; gap: 4px;
+}
+.stat-card .sc-num { font-size: 28px; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1.1; }
+.stat-card .sc-lbl { font-size: 12px; color: var(--ink3); }
+.stat-card.ok    .sc-num { color: var(--ok); }
+.stat-card.alert .sc-num { color: var(--alert); }
+.stat-card.warn  .sc-num { color: var(--warn); }
+
+/* ===================== 筛选 pills ===================== */
+.filter-bar { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.filter-bar .fl-label { font-size: 12px; color: var(--ink3); font-weight: 500; }
+.pill {
+  padding: 4px 12px; border-radius: 999px; font-size: 12px; font-weight: 500;
+  border: 1px solid var(--rule); background: var(--raised); color: var(--ink2);
+  cursor: pointer; transition: background .12s, border-color .12s, color .12s;
+}
+.pill:hover { background: var(--sunk); }
+.pill.active { background: var(--brand); color: var(--on-brand); border-color: var(--brand); }
+.search-input {
+  margin-left: auto; padding: 5px 12px; border: 1px solid var(--rule); border-radius: var(--r-sm);
+  background: var(--surface); color: var(--ink); font-size: 12px; outline: none; width: 180px;
+}
+.search-input:focus { border-color: var(--brand); }
+
+/* ===================== 明细表格 ===================== */
+.tbl-wrap { overflow-x: auto; border: 1px solid var(--rule); border-radius: var(--r-sm); }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th { background: var(--sunk); color: var(--ink2); font-weight: 600; font-size: 12px; padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--rule); white-space: nowrap; }
+th.num, td.num { text-align: right; font-variant-numeric: tabular-nums; }
+td { padding: 9px 12px; border-bottom: 1px solid var(--rule-soft); color: var(--ink); vertical-align: middle; }
+tr:last-child td { border-bottom: none; }
+tr.row-ok   td { background: transparent; }
+tr.row-alert td { background: var(--alert-soft); }
+tr.row-alert td.num { color: var(--alert); font-weight: 600; }
+tr.row-warn  td { background: var(--warn-soft); }
+tr.row-warn  td.num { color: var(--warn); font-weight: 600; }
+.row-tag { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; padding: 2px 8px; border-radius: 999px; font-weight: 500; }
+.tag-ok    { background: var(--ok-soft);    color: var(--ok);    border: 1px solid var(--ok-line); }
+.tag-alert { background: var(--alert-soft); color: var(--alert); border: 1px solid var(--alert-line); }
+.tag-warn  { background: var(--warn-soft);  color: var(--warn);  border: 1px solid var(--warn-line); }
+
+/* ===================== 只读声明 Banner ===================== */
+.readonly-banner {
+  display: flex; align-items: center; gap: 10px; padding: 10px 16px;
+  background: var(--ok-soft); border: 1px solid var(--ok-line); border-radius: var(--r-sm);
+  font-size: 12px; color: var(--ok);
+}
+.readonly-banner .ico { font-size: 15px; }
+
+/* ===================== 历史表格 ===================== */
+.hist-table td .status-dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; margin-right: 5px; background: var(--ok); }
+
+/* ===================== 占位页 ===================== */
+.placeholder { padding: 28px; max-width: 600px; }
+.placeholder .ph-badge {
+  display: inline-block; padding: 4px 12px; border-radius: 999px;
+  font-size: 11px; font-weight: 600; color: var(--info); background: var(--info-soft);
+  border: 1px dashed var(--info-line); margin-bottom: 14px;
+}
+.placeholder h2 { font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+.placeholder .ph-desc { color: var(--ink2); margin-bottom: 20px; line-height: 1.7; }
+.four-things .item { display: flex; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--rule-soft); }
+.four-things .item:last-child { border-bottom: none; }
+.four-things .item-label { font-weight: 600; min-width: 70px; color: var(--brand); }
+.four-things .item-desc { color: var(--ink2); font-size: 13px; }
+
+/* ===================== 页脚 ===================== */
+.page-foot { padding: 16px 28px; font-size: 11px; color: var(--ink3); border-top: 1px solid var(--rule-soft); margin-top: auto; line-height: 1.7; }
+
+/* ===================== 待确认标注浮层 ===================== */
+.pending-note {
+  display: inline-flex; align-items: center; gap: 4px; vertical-align: middle;
+  background: var(--warn-soft); color: var(--warn); border: 1px dashed var(--warn-line);
+  border-radius: 4px; padding: 1px 7px; font-size: 11px; font-weight: 500; cursor: help;
+}
+</style>
+</head>
+<body>
+
+<!-- ==================== 登录页 ==================== -->
+<div id="login">
+  <div class="login-card">
+    <div class="brand-row">
+      <div>
+        <h2>HR 智能工作台</h2>
+        <p class="sub">华辰精密制造有限公司</p>
+      </div>
+      <span class="chip brand"><span class="dot"></span>内网运行</span>
+    </div>
+
+    <div class="field">
+      <label for="lgUser">用户名</label>
+      <input id="lgUser" type="text" placeholder="请输入用户名" autocomplete="username">
+    </div>
+    <div class="field">
+      <label for="lgPass">口令</label>
+      <input id="lgPass" type="password" placeholder="请输入口令" autocomplete="current-password">
+    </div>
+    <button class="btn pri" id="lgBtn" style="width:100%;justify-content:center;margin-top:6px" onclick="doLogin()">登录</button>
+
+    <div class="demo-accts">
+      <div class="lbl">原型试用账号（权限清单确认后替换）</div>
+      <p><code>hr01 / hr01@2026</code><span>HR 专员</span></p>
+      <p><code>fin01 / fin01@2026</code><span>财务复核</span></p>
+      <p><code>admin / admin@2026</code><span>管理员</span></p>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== 主界面 ==================== -->
+<div id="app" class="hidden">
+  <!-- 顶部栏 -->
+  <div class="appbar">
+    <b>HR 智能工作台</b>
+    <span class="sep">|</span>
+    <span>华辰精密制造有限公司</span>
+    <span class="sep">|</span>
+    <span id="ab-phase">一期交付：薪资对账</span>
+    <span class="grow"></span>
+    <div class="acts">
+      <span id="ab-user" style="font-size:12px;color:var(--ink3)">hr01</span>
+      <button class="btn sm" onclick="doLogout()">退出</button>
+    </div>
+  </div>
+
+  <div class="shell">
+    <!-- 侧边导航 -->
+    <nav class="rail">
+      <div class="brand-block">
+        <div class="co">华辰精密制造有限公司</div>
+        <div class="nm">HR 智能工作台</div>
+        <div class="env"><span class="dot"></span>内网运行 · 数据不出外网</div>
+      </div>
+
+      <div class="navsec">
+        <div class="navlbl">一期交付</div>
+        <button class="navitem active" onclick="showRecon()" id="nav-recon">
+          <span class="ico">⊡</span> 薪资对账
+        </button>
+      </div>
+
+      <div class="navsec">
+        <div class="navlbl">后续需求池</div>
+        <button class="navitem pool" onclick="showPool('合同到期预警','提前识别合同到期风险，减少漏续签和用工风险。')">📋 合同到期预警</button>
+        <button class="navitem pool" onclick="showPool('花名册校验','发现员工主数据缺失、重复和字段矛盾，提升基础数据质量。')">👥 花名册校验</button>
+        <button class="navitem pool" onclick="showPool('考勤统计','减少打卡明细汇总工作，及时发现迟到、早退、缺卡和加班。')">🕐 考勤统计</button>
+        <button class="navitem pool" onclick="showPool('社保公积金核对','降低工资扣缴与申报数据不一致的风险。')">🏦 社保公积金核对</button>
+        <button class="navitem pool" onclick="showPool('个税代扣核对','复核个税代扣金额，降低计算和申报差错。')">📊 个税代扣核对</button>
+        <button class="navitem pool" onclick="showPool('招聘漏斗分析','看清各岗位和渠道的招聘转化效率。')">🔍 招聘漏斗分析</button>
+        <button class="navitem pool" onclick="showPool('人员成本分析','按部门和职级了解人数、薪资成本及结构变化。')">💰 人员成本分析</button>
+        <button class="navitem pool" onclick="showPool('绩效考核汇总','统一汇总多来源评分并形成可复核的绩效结果。')">⭐ 绩效考核汇总</button>
+        <button class="navitem pool" onclick="showPool('培训学时统计','掌握员工必修和选修完成情况，支持培训合规。')">📚 培训学时统计</button>
+        <button class="navitem pool" onclick="showPool('离职率分析','观察月度和部门人员流动，定位异常离职趋势。')">📉 离职率分析</button>
+        <button class="navitem pool" onclick="showPool('加班费核算','按加班类型和薪资标准核算加班费，减少人工计算。')">⏰ 加班费核算</button>
+      </div>
+
+      <div class="rail-foot">
+        虚线模块只登记业务价值与待澄清问题，一期不交付。<br>居家外网访问不进入一期。
+      </div>
+    </nav>
+
+    <!-- 主内容 -->
+    <div class="stage">
+
+      <!-- ——— 薪资对账区 ——— -->
+      <div id="recon-wrap">
+        <div class="topbar">
+          <h1>薪资对账</h1>
+          <span class="chip brand">对账型</span>
+          <span class="grow"></span>
+          <span style="font-size:12px;color:var(--ink3)">操作人：hr01</span>
+        </div>
+
+        <!-- 步骤条 -->
+        <div class="content" style="padding-bottom:0">
+          <div class="steps">
+            <button class="step-btn active" id="s1-btn" onclick="goStep(1)">① 上传与核对</button>
+            <button class="step-btn" id="s2-btn" onclick="goStep(2)" disabled>② 结果与差异</button>
+            <button class="step-btn" id="s3-btn" onclick="goStep(3)">③ 历史作业</button>
+          </div>
+        </div>
+
+        <!-- ===== 步骤一：上传 ===== -->
+        <div class="content" id="step1">
+          <h2 style="font-size:15px;font-weight:600">上传工资表与银行代发明细</h2>
+          <p style="color:var(--ink2);font-size:13px">系统只读取文件、只标记差异，不会修改、也不会回写任何一份原始文件。</p>
+
+          <div class="upload-grid">
+            <!-- 工资表 -->
+            <div class="dropzone" id="dz-payroll" onclick="document.getElementById('f-payroll').click()"
+              ondragover="event.preventDefault();this.classList.add('drag')"
+              ondragleave="this.classList.remove('drag')"
+              ondrop="handleDrop(event,'payroll')">
+              <input type="file" id="f-payroll" accept=".xlsx,.xls" onchange="handleFile(this,'payroll')">
+              <div class="dz-icon">📄</div>
+              <div class="dz-label">工资表</div>
+              <div class="dz-sub">点击选择或拖放 Excel 文件</div>
+              <div class="dz-aliases">金额列识别：实发工资 / 实发合计</div>
+              <div class="dz-file hidden" id="dz-payroll-name"></div>
+            </div>
+
+            <!-- 银行代发表 -->
+            <div class="dropzone" id="dz-bank" onclick="document.getElementById('f-bank').click()"
+              ondragover="event.preventDefault();this.classList.add('drag')"
+              ondragleave="this.classList.remove('drag')"
+              ondrop="handleDrop(event,'bank')">
+              <input type="file" id="f-bank" accept=".xlsx,.xls" onchange="handleFile(this,'bank')">
+              <div class="dz-icon">🏦</div>
+              <div class="dz-label">银行代发明细</div>
+              <div class="dz-sub">点击选择或拖放 Excel 文件</div>
+              <div class="dz-aliases">金额列识别：实发金额 / 代发金额</div>
+              <div class="dz-file hidden" id="dz-bank-name"></div>
+            </div>
+          </div>
+
+          <!-- 期间 + 操作 -->
+          <div class="card">
+            <div class="bd" style="display:flex;align-items:center;gap:12px">
+              <label style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:500">
+                核对期间
+                <input type="month" id="period" value="2026-05" style="border:1px solid var(--rule);border-radius:6px;padding:6px 10px;font-size:13px;outline:none">
+              </label>
+              <span style="flex:1"></span>
+              <button class="btn sm" onclick="resetFiles()">重新选择</button>
+              <button class="btn pri" id="run-btn" disabled onclick="runRecon()">开始核对</button>
+            </div>
+          </div>
+
+          <!-- 核对口径说明 -->
+          <div class="alert-box note">
+            <span class="ico">ℹ</span>
+            <div class="body" style="color:var(--ink)">
+              <div class="ttl" style="color:var(--ink)">核对口径</div>
+              <div class="criteria-list" style="margin-top:8px">
+                <div class="criteria-item">
+                  <span class="ci-label">员工匹配</span>
+                  <span class="ci-val"><span class="ci-confirmed">✓ 已确认</span> &nbsp;工号优先，不单独使用姓名 <span class="ci-ref">（D003）</span></span>
+                </div>
+                <div class="criteria-item">
+                  <span class="ci-label">工号缺失</span>
+                  <span class="ci-val">
+                    <span class="pending-note" title="D013：工号为空时是否允许按姓名匹配，尚未确认。">⚠ 待确认</span>
+                    &nbsp;是否可按姓名兜底？ <span class="ci-ref">（D013）</span>
+                  </span>
+                </div>
+                <div class="criteria-item">
+                  <span class="ci-label">同名员工</span>
+                  <span class="ci-val">
+                    <span class="pending-note" title="D014：同名且工号缺失时，应报错、跳过还是人工确认清单，尚未确认。">⚠ 待确认</span>
+                    &nbsp;报错 / 跳过 / 人工确认清单？ <span class="ci-ref">（D014）</span>
+                  </span>
+                </div>
+                <div class="criteria-item">
+                  <span class="ci-label">金额精度</span>
+                  <span class="ci-val">
+                    <span class="pending-note" title="D015：差异为0.01元时是否算不符？保留几位小数？如何四舍五入？财务主管明确表示尚未给出数值口径。">⚠ 待确认</span>
+                    &nbsp;容差 / 小数位 / 四舍五入口径 <span class="ci-ref">（D015）</span>
+                  </span>
+                </div>
+                <div class="criteria-item">
+                  <span class="ci-label">比较字段</span>
+                  <span class="ci-val"><span class="ci-confirmed">✓ 已确认</span> &nbsp;工资表「实发工资/实发合计」vs 银行「实发金额/代发金额」 <span class="ci-ref">（D004）</span></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== 步骤二：结果 ===== -->
+        <div class="content hidden" id="step2">
+          <!-- 只读声明 -->
+          <div class="readonly-banner">
+            <span class="ico">🔒</span>
+            <span>原始工资表和银行代发表全程只读，处理前后各计算一次 SHA-256，不一致即判作业失败。<b>本次核对未修改任何原始文件。</b></span>
+          </div>
+
+          <p style="color:var(--ink2);font-size:13px" id="res-sub">核对期间：2026-05 &nbsp;·&nbsp; 工资表：薪资主表_脱敏样例.xlsx &nbsp;·&nbsp; 银行明细：银行代发明细_脱敏样例.xlsx &nbsp;·&nbsp; 处理时间：2026-09-02 14:38</p>
+
+          <!-- 4格统计 -->
+          <div class="stats-grid">
+            <div class="stat-card ok">
+              <div class="sc-num">47</div>
+              <div class="sc-lbl">一致</div>
+            </div>
+            <div class="stat-card alert">
+              <div class="sc-num" style="font-size:22px">2</div>
+              <div class="sc-lbl">金额不符</div>
+            </div>
+            <div class="stat-card warn">
+              <div class="sc-num" style="font-size:22px">1</div>
+              <div class="sc-lbl">工资表有 · 银行无</div>
+            </div>
+            <div class="stat-card warn">
+              <div class="sc-num" style="font-size:22px">1</div>
+              <div class="sc-lbl">银行有 · 工资表无</div>
+            </div>
+          </div>
+
+          <!-- 筛选 + 搜索 -->
+          <div class="filter-bar">
+            <span class="fl-label">筛选</span>
+            <button class="pill active" data-cat="all" onclick="setFilter(this,'all')">全部 (51)</button>
+            <button class="pill" data-cat="diff" onclick="setFilter(this,'diff')">仅差异 (4)</button>
+            <button class="pill" data-cat="ok" onclick="setFilter(this,'ok')">一致 (47)</button>
+            <button class="pill" data-cat="alert" onclick="setFilter(this,'alert')">金额不符 (2)</button>
+            <button class="pill" data-cat="payroll-only" onclick="setFilter(this,'payroll-only')">工资表有但银行无 (1)</button>
+            <button class="pill" data-cat="bank-only" onclick="setFilter(this,'bank-only')">银行有但工资表无 (1)</button>
+            <input type="text" class="search-input" placeholder="按工号或姓名查找" oninput="doSearch(this.value)">
+          </div>
+
+          <!-- 明细表 -->
+          <div class="tbl-wrap">
+            <table id="detail-table">
+              <thead>
+                <tr>
+                  <th>#</th><th>工号</th><th>姓名</th><th>部门</th><th>结果</th>
+                  <th class="num">工资表金额</th>
+                  <th class="num">银行代发金额</th>
+                  <th class="num">差额（银行−工资表）</th>
+                  <th>备注</th>
+                </tr>
+              </thead>
+              <tbody id="detail-body">
+                <!-- 由 JS 填充 -->
+              </tbody>
+            </table>
+          </div>
+          <div style="font-size:12px;color:var(--ink3);text-align:right">
+            共 <span id="row-count">51</span> 条记录（原型展示抽样 12 条，完整明细含 51 行）
+          </div>
+
+          <!-- 导出 + 追溯 -->
+          <div style="display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap">
+            <button class="btn pri" onclick="alert('原型模式：实际导出将生成包含完整51行的 Excel 文件，含完整明细和差异清单两个 Sheet。')">⬇ 导出 Excel 结果</button>
+            <button class="btn" onclick="alert('原型模式：差异清单将单独导出，仅包含金额不符、工资表有但银行无、银行有但工资表无 4 条记录。')">⬇ 仅导出差异清单</button>
+          </div>
+
+          <div class="card">
+            <div class="hd">作业追溯</div>
+            <div class="bd">
+              <dl class="kv">
+                <dt>作业编号</dt><dd><code style="font-family:monospace;font-size:12px;color:var(--info)">JOB-20260902-0032</code></dd>
+                <dt>操作人</dt><dd>hr01（李静）</dd>
+                <dt>处理时间</dt><dd>2026-09-02 14:38:21</dd>
+                <dt>工资表</dt><dd>薪资主表_脱敏样例.xlsx（SHA-256: a3f1…b7c2，处理前后一致 ✓）</dd>
+                <dt>银行代发表</dt><dd>银行代发明细_脱敏样例.xlsx（SHA-256: e9d4…3a81，处理前后一致 ✓）</dd>
+                <dt>核对口径</dt><dd>工号优先匹配；金额精度口径待确认（本次以差额为准展示，不做自动判定） <span class="pending-note" title="D015">⚠ 精度口径未定</span></dd>
+              </dl>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== 步骤三：历史 ===== -->
+        <div class="content hidden" id="step3">
+          <h2 style="font-size:15px;font-weight:600">历史作业</h2>
+          <p style="color:var(--ink2);font-size:13px">每次核对都留痕：谁、什么时候、用哪两份文件、得到什么结论。</p>
+
+          <div class="tbl-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>创建时间</th><th>期间</th><th>状态</th><th>操作人</th>
+                  <th class="num">参与行数</th><th>统计摘要</th><th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>2026-09-02 14:38</td>
+                  <td>2026-05</td>
+                  <td><span class="chip ok" style="font-size:11px"><span class="dot"></span>完成</span></td>
+                  <td>hr01（李静）</td>
+                  <td class="num">51</td>
+                  <td style="font-size:12px;color:var(--ink2)">一致 47 · 不符 2 · 缺失 2</td>
+                  <td><button class="btn sm" onclick="goStep(2)">查看</button></td>
+                </tr>
+                <tr>
+                  <td>2026-08-05 10:22</td>
+                  <td>2026-04</td>
+                  <td><span class="chip ok" style="font-size:11px"><span class="dot"></span>完成</span></td>
+                  <td>hr01（李静）</td>
+                  <td class="num">49</td>
+                  <td style="font-size:12px;color:var(--ink2)">一致 49 · 不符 0 · 缺失 0</td>
+                  <td><button class="btn sm" onclick="alert('原型模式：可查看历史作业详情')">查看</button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="alert-box note" style="margin-top:4px">
+            <span class="ico">ℹ</span>
+            <div class="body">
+              <div class="ttl">结果保留期限</div>
+              历史作业保留多久、由谁删除、是否需要归档，尚未确认。
+              <span class="pending-note" title="D016">⚠ 待确认 D016</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ——— 后续需求池占位 ——— -->
+      <div id="pool-wrap" class="hidden">
+        <div class="placeholder">
+          <div class="ph-badge">后续需求池 · 一期不交付</div>
+          <h2 id="pool-name">模块名</h2>
+          <p class="ph-desc" id="pool-desc">业务价值说明</p>
+
+          <div class="alert-box note" style="margin-bottom:16px">
+            <span class="ico">ℹ</span>
+            <div class="body">
+              <div class="ttl">界面已就位，处理逻辑尚未实现</div>
+              本模块进入一期后续需求池，需要先完成以下四件事才能开工。
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="hd">开工前需要先谈清楚的四件事</div>
+            <div class="bd four-things">
+              <div class="item">
+                <div class="item-label">要哪些表</div>
+                <div class="item-desc">需要哪几份表、由谁提供、多久更新一次</div>
+              </div>
+              <div class="item">
+                <div class="item-label">怎么算</div>
+                <div class="item-desc">判定规则和边界情况，和薪资对账一样要先定口径</div>
+              </div>
+              <div class="item">
+                <div class="item-label">出什么</div>
+                <div class="item-desc">结果怎么分类、导出成什么样、给谁看</div>
+              </div>
+              <div class="item">
+                <div class="item-label">谁能用</div>
+                <div class="item-desc">谁可以上传、查看、下载</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="page-foot">
+        本系统仅标记差异，不代表已核准；审批责任仍由 HR / 财务承担。<br>
+        原始文件全程只读：处理前后各计算一次 SHA-256，不一致即判作业失败。<br>
+        <span style="color:var(--warn)">⚠ 当前为 UI 原型，标注「待确认」的口径项需甲方进一步确认后方可纳入开发。</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===================== 原型数据 =====================
+// 注意：验收文档(材料12)里写的是HC前缀，但实际xlsx样例里用的是GH前缀，这里以实际样例数据为准
+const ROWS = [
+  {id:1, eid:'GH0001', name:'张伟',   dept:'技术部', cat:'ok',           payroll:13892.75, bank:13892.75},
+  {id:2, eid:'GH0002', name:'王芳',   dept:'技术部', cat:'ok',           payroll:14520.50, bank:14520.50},
+  {id:3, eid:'GH0003', name:'李娜',   dept:'技术部', cat:'ok',           payroll:15148.25, bank:15148.25},
+  {id:4, eid:'GH0004', name:'刘洋',   dept:'技术部', cat:'ok',           payroll:12600.00, bank:12600.00},
+  {id:5, eid:'GH0005', name:'陈晨',   dept:'销售部', cat:'ok',           payroll:11200.00, bank:11200.00},
+  {id:6, eid:'GH0006', name:'赵静',   dept:'销售部', cat:'ok',           payroll:10800.00, bank:10800.00},
+  // 金额不符：GH0007 银行比工资表多500元
+  {id:7, eid:'GH0007', name:'赵敏',   dept:'技术部', cat:'alert',        payroll:14799.50, bank:14299.50, note:'银行比工资表少 500.00 元（差额 D015 精度口径待确认）'},
+  {id:8, eid:'GH0008', name:'孙涛',   dept:'运营部', cat:'ok',           payroll:9800.00,  bank:9800.00},
+  {id:9, eid:'GH0009', name:'周丽',   dept:'人事部', cat:'ok',           payroll:8900.00,  bank:8900.00},
+  {id:10,eid:'GH0010', name:'吴强',   dept:'财务部', cat:'ok',           payroll:11500.00, bank:11500.00},
+  // 工资表有但银行无：GH0031
+  {id:31,eid:'GH0031', name:'谢婷',   dept:'市场部', cat:'payroll-only', payroll:7800.00,  bank:null,     note:'工资表有记录，银行代发表中无此工号'},
+  // 金额不符：GH0023 差+180
+  {id:23,eid:'GH0023', name:'谢刚',   dept:'市场部', cat:'alert',        payroll:9917.00,  bank:10097.00, note:'银行比工资表多 180.00 元（差额 D015 精度口径待确认）'},
+  // 银行有但工资表无：GH0051
+  {id:51,eid:'GH0051', name:'宋伟',   dept:'技术部', cat:'bank-only',    payroll:null,     bank:12300.00, note:'银行代发表有记录，工资表中无此工号'},
+];
+
+let currentFilter = 'all';
+let currentSearch = '';
+
+// ===================== 登录 =====================
+function doLogin() {
+  const u = document.getElementById('lgUser').value.trim();
+  if (!u) { alert('请输入用户名'); return; }
+  document.getElementById('ab-user').textContent = u;
+  document.getElementById('login').classList.add('hidden');
+  document.getElementById('app').classList.remove('hidden');
+  renderDetail();
+}
+document.getElementById('lgPass').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+document.getElementById('lgUser').addEventListener('keydown', e => { if(e.key==='Enter') document.getElementById('lgPass').focus(); });
+
+function doLogout() {
+  document.getElementById('app').classList.add('hidden');
+  document.getElementById('login').classList.remove('hidden');
+}
+
+// ===================== 文件上传 =====================
+let fileState = {payroll: false, bank: false};
+function handleFile(input, type) {
+  const name = input.files[0]?.name;
+  if (!name) return;
+  const dz = document.getElementById('dz-' + type);
+  const nameEl = document.getElementById('dz-' + type + '-name');
+  dz.classList.add('ready');
+  nameEl.textContent = '✓ ' + name;
+  nameEl.classList.remove('hidden');
+  fileState[type] = true;
+  updateRunBtn();
+}
+function handleDrop(e, type) {
+  e.preventDefault();
+  const dz = document.getElementById('dz-' + type);
+  dz.classList.remove('drag');
+  const file = e.dataTransfer.files[0];
+  if (!file) return;
+  const nameEl = document.getElementById('dz-' + type + '-name');
+  dz.classList.add('ready');
+  nameEl.textContent = '✓ ' + file.name;
+  nameEl.classList.remove('hidden');
+  fileState[type] = true;
+  updateRunBtn();
+}
+function updateRunBtn() {
+  document.getElementById('run-btn').disabled = !(fileState.payroll && fileState.bank);
+}
+function resetFiles() {
+  ['payroll','bank'].forEach(t => {
+    fileState[t] = false;
+    document.getElementById('dz-'+t).classList.remove('ready','drag');
+    document.getElementById('dz-'+t+'-name').classList.add('hidden');
+    document.getElementById('f-'+t).value = '';
+  });
+  updateRunBtn();
+}
+function runRecon() {
+  document.getElementById('s2-btn').disabled = false;
+  goStep(2);
+}
+
+// ===================== 步骤切换 =====================
+function goStep(n) {
+  [1,2,3].forEach(i => {
+    document.getElementById('step'+i).classList.toggle('hidden', i!==n);
+    const btn = document.getElementById('s'+i+'-btn');
+    btn.classList.toggle('active', i===n);
+  });
+}
+
+// ===================== 导航切换 =====================
+function showRecon() {
+  document.getElementById('recon-wrap').classList.remove('hidden');
+  document.getElementById('pool-wrap').classList.add('hidden');
+  document.getElementById('nav-recon').classList.add('active');
+  document.querySelectorAll('.navitem.pool').forEach(b => b.classList.remove('active'));
+}
+function showPool(name, desc) {
+  document.getElementById('recon-wrap').classList.add('hidden');
+  document.getElementById('pool-wrap').classList.remove('hidden');
+  document.getElementById('pool-name').textContent = name;
+  document.getElementById('pool-desc').textContent = desc;
+  document.getElementById('nav-recon').classList.remove('active');
+  document.querySelectorAll('.navitem.pool').forEach(b => b.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+}
+
+// ===================== 明细表格渲染 =====================
+function fmtAmt(v) {
+  if (v === null || v === undefined) return '<span style="color:var(--ink3)">—</span>';
+  return v.toLocaleString('zh-CN', {minimumFractionDigits:2, maximumFractionDigits:2});
+}
+function fmtDiff(row) {
+  if (row.cat === 'payroll-only') return '<span style="color:var(--ink3)">—</span>';
+  if (row.cat === 'bank-only')    return '<span style="color:var(--ink3)">—</span>';
+  const d = (row.bank - row.payroll).toFixed(2);
+  const v = parseFloat(d);
+  if (v === 0) return '<span style="color:var(--ink3)">0.00</span>';
+  const style = v > 0 ? 'color:var(--warn)' : 'color:var(--alert)';
+  const sign = v > 0 ? '+' : '';
+  return `<span style="${style}">${sign}${parseFloat(d).toLocaleString('zh-CN',{minimumFractionDigits:2})}</span>`;
+}
+function tagHtml(cat) {
+  const map = {
+    'ok':           ['tag-ok',    '一致'],
+    'alert':        ['tag-alert', '金额不符'],
+    'payroll-only': ['tag-warn',  '工资表有·银行无'],
+    'bank-only':    ['tag-warn',  '银行有·工资表无'],
+  };
+  const [cls, lbl] = map[cat];
+  return `<span class="row-tag ${cls}">${lbl}</span>`;
+}
+function rowClass(cat) {
+  return {ok:'row-ok', alert:'row-alert', 'payroll-only':'row-warn', 'bank-only':'row-warn'}[cat];
+}
+
+function renderDetail() {
+  const filtered = ROWS.filter(r => {
+    const matchCat = currentFilter === 'all' ? true
+      : currentFilter === 'diff' ? r.cat !== 'ok'
+      : r.cat === currentFilter;
+    const q = currentSearch.toLowerCase();
+    const matchSearch = !q || r.eid.toLowerCase().includes(q) || r.name.includes(q);
+    return matchCat && matchSearch;
+  });
+  const tbody = document.getElementById('detail-body');
+  tbody.innerHTML = filtered.map((r,i) => `
+    <tr class="${rowClass(r.cat)}">
+      <td class="num" style="color:var(--ink3)">${i+1}</td>
+      <td><code style="font-family:monospace;font-size:12px">${r.eid}</code></td>
+      <td>${r.name}</td>
+      <td style="color:var(--ink2)">${r.dept}</td>
+      <td>${tagHtml(r.cat)}</td>
+      <td class="num">${fmtAmt(r.payroll)}</td>
+      <td class="num">${fmtAmt(r.bank)}</td>
+      <td class="num">${fmtDiff(r)}</td>
+      <td style="font-size:12px;color:var(--ink3)">${r.note||''}</td>
+    </tr>
+  `).join('');
+  document.getElementById('row-count').textContent = 51;
+}
+
+function setFilter(btn, cat) {
+  document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  currentFilter = cat;
+  renderDetail();
+}
+function doSearch(q) {
+  currentSearch = q;
+  renderDetail();
+}
+</script>
+</body>
+</html>

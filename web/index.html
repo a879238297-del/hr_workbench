@@ -1,459 +1,1508 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
+<meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>HR 智能工作台 · 华辰精密制造</title>
 <style>
-/* ── 设计令牌 ── */
-:root{
-  --brand:#2563eb;--brand-light:#eff6ff;--brand-dark:#1d4ed8;
-  --ok:#16a34a;--ok-bg:#f0fdf4;
-  --alert:#e11d48;--alert-bg:#fff1f2;
-  --warn:#d97706;--warn-bg:#fffbeb;
-  --info:#7c3aed;--info-bg:#f5f3ff;
-  --surface:#f8fafc;--card:#fff;
-  --border:#e2e8f0;--border2:#cbd5e1;
-  --text:#1e293b;--muted:#64748b;--muted2:#94a3b8;
-  --radius:8px;--shadow:0 1px 3px rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.06);
-  --shadow-md:0 4px 6px -1px rgba(0,0,0,.1),0 2px 4px -1px rgba(0,0,0,.06);
+/* ===================== 设计令牌 ===================== */
+:root {
+  color-scheme: light;
+  --paper:    #F4F6FA;
+  --surface:  #FAFBFD;
+  --raised:   #FFFFFF;
+  --sunk:     #EDF0F7;
+  --ink:      #232838;
+  --ink2:     #5A6178;
+  --ink3:     #8A91A6;
+  --rule:     #E3E7F0;
+  --rule-soft:#EFF2F8;
+
+  --brand:      #4C6FD0;
+  --brand-soft: #E9EFFC;
+  --brand-line: #BFD2F5;
+  --on-brand:   #FFFFFF;
+
+  --ok:         #3E8E6E; --ok-soft:    #E4F3EC; --ok-line:    #AEDCC7;
+  --alert:      #C4566A; --alert-soft: #FBEAEE; --alert-line: #F0B9C4;
+  --warn:       #AF7A2C; --warn-soft:  #FAF0DC; --warn-line:  #E9CE9C;
+  --info:       #6A6F91; --info-soft:  #F0F1F7; --info-line:  #C9CCDE;
+
+  --shadow-sm: 0 1px 2px rgba(35,40,56,.05);
+  --shadow:    0 1px 3px rgba(35,40,56,.05), 0 8px 20px -14px rgba(35,40,56,.22);
+  --r-sm: 8px; --r: 12px; --r-lg: 16px;
 }
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:-apple-system,BlinkMacSystemFont,'Microsoft YaHei',sans-serif;background:var(--surface);color:var(--text);font-size:14px;line-height:1.5}
-.hidden{display:none!important}
 
-/* ── 登录页 ── */
-#screen-login{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#1e3a8a 0%,#2563eb 50%,#0ea5e9 100%)}
-.login-card{background:var(--card);border-radius:16px;padding:48px 40px;width:400px;box-shadow:0 20px 60px rgba(0,0,0,.2)}
-.login-logo{text-align:center;margin-bottom:32px}
-.login-logo h1{font-size:22px;font-weight:700;color:var(--text)}
-.login-logo p{color:var(--muted);font-size:13px;margin-top:4px}
-.login-badge{display:inline-flex;align-items:center;gap:4px;background:var(--brand-light);color:var(--brand);font-size:12px;padding:2px 10px;border-radius:20px;margin-top:8px}
-.form-group{margin-bottom:16px}
-.form-group label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px;font-weight:500}
-.form-group input{width:100%;border:1.5px solid var(--border2);border-radius:var(--radius);padding:10px 14px;font-size:14px;color:var(--text);outline:none;transition:border .2s}
-.form-group input:focus{border-color:var(--brand)}
-.btn-primary{width:100%;background:var(--brand);color:#fff;border:none;border-radius:var(--radius);padding:11px;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px;transition:background .2s}
-.btn-primary:hover{background:var(--brand-dark)}
-.login-hint{text-align:center;color:var(--muted2);font-size:12px;margin-top:16px}
-.error-msg{color:var(--alert);font-size:13px;margin-top:8px;text-align:center;min-height:20px}
+/* ===================== 重置 & 基础 ===================== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; font-family: system-ui, "Microsoft YaHei UI", "PingFang SC", sans-serif; font-size: 14px; background: var(--paper); color: var(--ink); line-height: 1.6; }
+button { cursor: pointer; font: inherit; border: none; background: none; }
+input { font: inherit; }
+a { color: var(--brand); text-decoration: none; }
+.hidden { display: none !important; }
 
-/* ── 主界面布局 ── */
-#screen-main{display:flex;min-height:100vh}
+/* ===================== 通用组件 ===================== */
+.chip {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 500;
+}
+.chip.ok    { background: var(--ok-soft);    color: var(--ok);    border: 1px solid var(--ok-line); }
+.chip.alert { background: var(--alert-soft); color: var(--alert); border: 1px solid var(--alert-line); }
+.chip.warn  { background: var(--warn-soft);  color: var(--warn);  border: 1px solid var(--warn-line); }
+.chip.info  { background: var(--info-soft);  color: var(--info);  border: 1px solid var(--info-line); }
+.chip.brand { background: var(--brand-soft); color: var(--brand); border: 1px solid var(--brand-line); }
+.dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
 
-/* 左侧 Rail */
-.rail{width:220px;background:#1e293b;color:#94a3b8;display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto}
-.rail-brand{padding:20px 16px;border-bottom:1px solid #334155}
-.rail-brand h2{color:#f1f5f9;font-size:15px;font-weight:700;line-height:1.3}
-.rail-brand p{color:#64748b;font-size:12px;margin-top:2px}
-.rail-status{display:flex;align-items:center;gap:5px;margin-top:8px}
-.rail-status .dot{width:6px;height:6px;background:#22c55e;border-radius:50%}
-.rail-status span{font-size:11px;color:#22c55e}
-.rail-section{padding:12px 8px 4px;font-size:11px;color:#475569;text-transform:uppercase;letter-spacing:.05em;font-weight:600}
-.rail-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:6px;margin:2px 8px;cursor:pointer;transition:all .15s;font-size:13px;color:#94a3b8}
-.rail-item:hover{background:#334155;color:#f1f5f9}
-.rail-item.active{background:var(--brand);color:#fff}
-.rail-item.pool-item{opacity:.55;border:1.5px dashed #334155;background:transparent}
-.rail-item.pool-item:hover{opacity:.8;background:#1e3a5f}
-.rail-icon{font-size:16px;width:20px;text-align:center}
-.rail-footer{margin-top:auto;padding:16px;border-top:1px solid #334155}
-.rail-user{font-size:12px;color:#64748b;display:flex;align-items:center;justify-content:space-between}
-.btn-logout{background:none;border:1px solid #334155;color:#64748b;font-size:11px;padding:3px 8px;border-radius:4px;cursor:pointer;transition:all .2s}
-.btn-logout:hover{border-color:#e11d48;color:#e11d48}
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 7px 16px; border-radius: var(--r-sm); font-size: 13px; font-weight: 500;
+  border: 1px solid var(--rule); background: var(--raised); color: var(--ink);
+  transition: background .15s, border-color .15s;
+}
+.btn:hover { background: var(--sunk); }
+.btn.pri { background: var(--brand); color: var(--on-brand); border-color: var(--brand); }
+.btn.pri:hover { background: #3d5fb8; border-color: #3d5fb8; }
+.btn:disabled { opacity: .45; cursor: not-allowed; }
+.btn.sm { padding: 5px 12px; font-size: 12px; }
 
-/* 主内容区 */
-.main-content{flex:1;display:flex;flex-direction:column;overflow:hidden}
-.topbar{background:var(--card);border-bottom:1px solid var(--border);padding:12px 24px;display:flex;align-items:center;gap:16px}
-.topbar h3{font-size:16px;font-weight:600;color:var(--text)}
-.content-body{flex:1;padding:24px;overflow-y:auto}
+.card { background: var(--raised); border: 1px solid var(--rule); border-radius: var(--r); box-shadow: var(--shadow-sm); }
+.card .hd { display: flex; align-items: center; gap: 8px; padding: 14px 18px; border-bottom: 1px solid var(--rule-soft); font-weight: 600; }
+.card .bd { padding: 16px 18px; }
 
-/* 步骤条 */
-.steps{display:flex;gap:0;margin-bottom:24px}
-.step{display:flex;align-items:center;padding:10px 20px;background:var(--card);border:1px solid var(--border);font-size:13px;cursor:pointer;transition:all .15s;flex:1;justify-content:center;gap:8px;color:var(--muted)}
-.step:first-child{border-radius:var(--radius) 0 0 var(--radius)}
-.step:last-child{border-radius:0 var(--radius) var(--radius) 0}
-.step:not(:first-child){border-left:none}
-.step.active{background:var(--brand);color:#fff;border-color:var(--brand);font-weight:600}
-.step.done{background:var(--ok-bg);color:var(--ok);border-color:var(--ok)}
-.step-num{width:20px;height:20px;border-radius:50%;border:1.5px solid currentColor;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
-.step.active .step-num{background:#fff;color:var(--brand)}
-.step.done .step-num{background:var(--ok);color:#fff;border-color:var(--ok)}
+.alert-box { display: flex; gap: 10px; padding: 14px 16px; border-radius: var(--r-sm); border: 1px solid; }
+.alert-box .ico { font-style: normal; font-size: 15px; flex-shrink: 0; margin-top: 1px; }
+.alert-box .body .ttl { font-weight: 600; margin-bottom: 4px; }
+.alert-box.note  { background: var(--info-soft);  color: var(--info);  border-color: var(--info-line); }
+.alert-box.ok    { background: var(--ok-soft);    color: var(--ok);    border-color: var(--ok-line); }
+.alert-box.warn  { background: var(--warn-soft);  color: var(--warn);  border-color: var(--warn-line); }
 
-/* 卡片 */
-.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow)}
+.kv { display: grid; grid-template-columns: auto 1fr; gap: 4px 16px; font-size: 13px; }
+.kv dt { color: var(--ink3); font-weight: 500; white-space: nowrap; }
+.kv dd { color: var(--ink); }
 
-/* 上传区域 */
-.upload-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
-.dropzone{border:2px dashed var(--border2);border-radius:var(--radius);padding:32px 20px;text-align:center;cursor:pointer;transition:all .2s;background:var(--surface);position:relative}
-.dropzone:hover,.dropzone.drag-over{border-color:var(--brand);background:var(--brand-light)}
-.dropzone.uploaded{border-color:var(--ok);border-style:solid;background:var(--ok-bg)}
-.dropzone-icon{font-size:32px;margin-bottom:8px}
-.dropzone-label{font-weight:600;color:var(--text);font-size:14px}
-.dropzone-hint{color:var(--muted);font-size:12px;margin-top:4px}
-.dropzone-file{color:var(--ok);font-size:13px;font-weight:500;margin-top:6px}
-.dropzone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer}
+/* ===================== 登录页 ===================== */
+#login {
+  min-height: 100%; display: flex; align-items: center; justify-content: center;
+  padding: 24px; background: linear-gradient(135deg, #f0f4ff 0%, #fafbfd 60%);
+}
+.login-card {
+  width: 100%; max-width: 400px;
+  background: var(--raised); border-radius: var(--r-lg); box-shadow: var(--shadow); padding: 36px 32px;
+}
+.login-card .brand-row { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 28px; }
+.login-card h2 { font-size: 20px; font-weight: 700; }
+.login-card .sub { font-size: 13px; color: var(--ink2); margin-top: 2px; }
+.field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 14px; }
+.field label { font-size: 13px; font-weight: 500; color: var(--ink2); }
+.field input {
+  padding: 9px 12px; border: 1px solid var(--rule); border-radius: var(--r-sm);
+  background: var(--surface); color: var(--ink); transition: border-color .15s;
+  outline: none;
+}
+.field input:focus { border-color: var(--brand); box-shadow: 0 0 0 3px var(--brand-soft); }
+.login-error { color: var(--alert); font-size: 13px; text-align: center; min-height: 20px; margin-top: 8px; }
+.demo-accts { margin-top: 20px; padding: 12px 14px; background: var(--sunk); border-radius: var(--r-sm); font-size: 12px; color: var(--ink2); }
+.demo-accts .lbl { font-weight: 600; margin-bottom: 6px; color: var(--ink3); }
+.demo-accts p { display: flex; justify-content: space-between; padding: 2px 0; }
+.demo-accts code { font-family: "Cascadia Code", "Consolas", monospace; color: var(--brand); font-size: 12px; }
 
-/* 口径说明 */
-.policy-box{background:#fffbeb;border:1px solid #fcd34d;border-radius:var(--radius);padding:14px 16px;margin-bottom:20px}
-.policy-box h4{color:#92400e;font-size:13px;font-weight:600;margin-bottom:8px}
-.policy-item{display:flex;align-items:flex-start;gap:8px;font-size:12px;color:#78350f;margin-bottom:4px}
-.badge-ok{display:inline-flex;align-items:center;gap:3px;background:var(--ok-bg);color:var(--ok);font-size:11px;padding:1px 7px;border-radius:20px;font-weight:500}
-.badge-warn{display:inline-flex;align-items:center;gap:3px;background:var(--warn-bg);color:var(--warn);font-size:11px;padding:1px 7px;border-radius:20px;font-weight:500}
-.period-row{display:flex;align-items:center;gap:12px;margin-bottom:20px}
-.period-row label{font-size:13px;color:var(--muted);font-weight:500;white-space:nowrap}
-.period-row input{border:1.5px solid var(--border2);border-radius:6px;padding:7px 12px;font-size:13px;color:var(--text);outline:none}
-.period-row input:focus{border-color:var(--brand)}
-.btn-run{background:var(--brand);color:#fff;border:none;border-radius:var(--radius);padding:10px 28px;font-size:14px;font-weight:600;cursor:pointer;transition:background .2s;display:flex;align-items:center;gap:8px}
-.btn-run:hover{background:var(--brand-dark)}
-.btn-run:disabled{background:var(--muted2);cursor:not-allowed}
+/* ===================== 主界面框架 ===================== */
+#app { display: flex; flex-direction: column; height: 100%; }
+.appbar {
+  display: flex; align-items: center; gap: 10px; padding: 0 20px; height: 48px;
+  background: var(--raised); border-bottom: 1px solid var(--rule); flex-shrink: 0;
+  font-size: 13px; font-weight: 500; color: var(--ink2);
+}
+.appbar b { color: var(--ink); font-size: 14px; }
+.appbar .sep { color: var(--rule); }
+.appbar .grow { flex: 1; }
+.appbar .acts { display: flex; gap: 8px; }
 
-/* 统计卡 */
-.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
-.stat-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;text-align:center;box-shadow:var(--shadow)}
-.stat-card.ok{border-top:3px solid var(--ok)}
-.stat-card.alert{border-top:3px solid var(--alert)}
-.stat-card.warn-l{border-top:3px solid var(--warn)}
-.stat-card.warn-r{border-top:3px solid #f59e0b}
-.stat-num{font-size:32px;font-weight:800;line-height:1}
-.stat-card.ok .stat-num{color:var(--ok)}
-.stat-card.alert .stat-num{color:var(--alert)}
-.stat-card.warn-l .stat-num,.stat-card.warn-r .stat-num{color:var(--warn)}
-.stat-label{font-size:12px;color:var(--muted);margin-top:6px}
+.shell { display: flex; flex: 1; overflow: hidden; }
 
-/* 筛选条 */
-.filter-bar{display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap}
-.pill{border:1.5px solid var(--border2);border-radius:20px;padding:4px 14px;font-size:13px;color:var(--muted);cursor:pointer;transition:all .15s;background:var(--card)}
-.pill:hover{border-color:var(--brand);color:var(--brand)}
-.pill.active{background:var(--brand);color:#fff;border-color:var(--brand)}
-.search-box{margin-left:auto;position:relative}
-.search-box input{border:1.5px solid var(--border2);border-radius:6px;padding:6px 12px 6px 30px;font-size:13px;outline:none;color:var(--text);width:200px}
-.search-box input:focus{border-color:var(--brand)}
-.search-box .ico{position:absolute;left:8px;top:50%;transform:translateY(-50%);color:var(--muted2);font-size:14px}
+/* ===================== 侧边导航 ===================== */
+.rail {
+  width: 220px; flex-shrink: 0; background: var(--raised); border-right: 1px solid var(--rule);
+  display: flex; flex-direction: column; overflow-y: auto;
+}
+.rail .brand-block { padding: 18px 16px; border-bottom: 1px solid var(--rule-soft); }
+.rail .brand-block .co { font-size: 11px; color: var(--ink3); font-weight: 500; letter-spacing: .5px; text-transform: uppercase; }
+.rail .brand-block .nm { font-size: 14px; font-weight: 700; color: var(--ink); margin: 2px 0; }
+.rail .brand-block .env { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--ok); }
+.rail .brand-block .env .dot { background: var(--ok); width: 5px; height: 5px; }
 
-/* 结果表格 */
-.result-table-wrap{overflow-x:auto}
-table{width:100%;border-collapse:collapse;font-size:13px}
-thead th{background:var(--surface);border-bottom:2px solid var(--border2);padding:9px 12px;text-align:left;font-weight:600;color:var(--muted);white-space:nowrap}
-tbody tr{border-bottom:1px solid var(--border);transition:background .1s}
-tbody tr:hover{background:var(--surface)}
-tbody td{padding:9px 12px;color:var(--text)}
-tr.row-match td:first-child{color:var(--ok)}
-tr.row-alert{background:var(--alert-bg)}
-tr.row-alert td{color:#9f1239}
-tr.row-warn{background:var(--warn-bg)}
-tr.row-warn td{color:#92400e}
-.cat-badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600}
-.cat-match{background:var(--ok-bg);color:var(--ok)}
-.cat-diff{background:var(--alert-bg);color:var(--alert)}
-.cat-payroll{background:var(--warn-bg);color:var(--warn)}
-.cat-bank{background:#fef3c7;color:#b45309}
-.delta-neg{color:var(--alert);font-weight:600}
-.delta-pos{color:var(--ok);font-weight:600}
-.no-data{text-align:center;padding:40px;color:var(--muted2);font-size:13px}
+.navsec { padding: 12px 0 4px; }
+.navlbl { padding: 0 16px 6px; font-size: 11px; font-weight: 600; color: var(--ink3); letter-spacing: .5px; text-transform: uppercase; }
+.navitem {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 16px; font-size: 13px; color: var(--ink2);
+  cursor: pointer; border-radius: 0; transition: background .12s;
+  border: none; background: none; width: 100%; text-align: left;
+}
+.navitem:hover { background: var(--sunk); color: var(--ink); }
+.navitem.active { background: var(--brand-soft); color: var(--brand); font-weight: 600; }
+.navitem.pool { color: var(--ink3); font-size: 12px; padding: 6px 16px; }
+.navitem.pool:hover { background: var(--sunk); color: var(--ink2); }
+.navitem .ico { width: 16px; text-align: center; flex-shrink: 0; }
+.rail-foot { margin-top: auto; padding: 16px; font-size: 11px; color: var(--ink3); line-height: 1.5; border-top: 1px solid var(--rule-soft); }
 
-/* 审计卡 */
-.audit-card{margin-top:16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;font-size:12px;color:var(--muted)}
-.audit-card h4{font-weight:600;color:var(--text);margin-bottom:8px;font-size:13px}
-.audit-item{display:flex;gap:8px;margin-bottom:3px}
-.audit-label{color:var(--muted2);width:80px;flex-shrink:0}
+/* ===================== 主内容区 ===================== */
+.stage { flex: 1; overflow-y: auto; display: flex; flex-direction: column; }
+.topbar { display: flex; align-items: center; gap: 10px; padding: 18px 28px 0; }
+.topbar h1 { font-size: 18px; font-weight: 700; }
+.topbar .grow { flex: 1; }
 
-/* 导出按钮 */
-.action-bar{display:flex;gap:10px;margin-bottom:16px}
-.btn-export{border:1.5px solid var(--ok);color:var(--ok);background:var(--ok-bg);border-radius:var(--radius);padding:8px 18px;font-size:13px;font-weight:500;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:6px}
-.btn-export:hover{background:var(--ok);color:#fff}
+.content { padding: 20px 28px; display: flex; flex-direction: column; gap: 16px; }
 
-/* 历史表 */
-.history-table th,.history-table td{padding:10px 14px}
+/* ===================== 步骤条 ===================== */
+.steps { display: flex; gap: 0; background: var(--raised); border: 1px solid var(--rule); border-radius: var(--r); overflow: hidden; }
+.step-btn {
+  flex: 1; padding: 12px 8px; text-align: center; font-size: 13px; font-weight: 500;
+  color: var(--ink3); border: none; background: none; cursor: pointer;
+  border-right: 1px solid var(--rule); transition: background .12s, color .12s;
+  position: relative;
+}
+.step-btn:last-child { border-right: none; }
+.step-btn:hover { background: var(--sunk); color: var(--ink); }
+.step-btn.active { background: var(--brand-soft); color: var(--brand); font-weight: 600; }
+.step-btn:disabled { opacity: .4; cursor: not-allowed; }
 
-/* 只读声明 Banner */
-.readonly-banner{background:var(--ok-bg);border:1px solid #86efac;border-radius:var(--radius);padding:10px 14px;display:flex;align-items:center;gap:10px;margin-bottom:16px;font-size:12px;color:#166534}
-.readonly-banner .ico{font-size:18px;flex-shrink:0}
+/* ===================== 上传区 ===================== */
+.upload-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.dropzone {
+  border: 2px dashed var(--rule); border-radius: var(--r); padding: 28px 20px;
+  text-align: center; cursor: pointer; transition: border-color .15s, background .15s;
+  background: var(--surface); display: flex; flex-direction: column; align-items: center; gap: 8px;
+}
+.dropzone:hover, .dropzone.drag { border-color: var(--brand); background: var(--brand-soft); }
+.dropzone.ready { border-color: var(--ok); border-style: solid; background: var(--ok-soft); }
+.dropzone .dz-icon { font-size: 28px; line-height: 1; }
+.dropzone .dz-label { font-weight: 600; font-size: 13px; }
+.dropzone .dz-sub { font-size: 12px; color: var(--ink3); }
+.dropzone .dz-aliases { font-size: 11px; color: var(--ink3); margin-top: 2px; }
+.dropzone .dz-file { font-size: 12px; color: var(--ok); font-weight: 500; margin-top: 4px; }
+.dropzone input[type=file] { display: none; }
 
-/* 占位页 */
-#screen-pool{flex:1;display:flex;align-items:center;justify-content:center}
-.pool-center{text-align:center;max-width:480px;padding:40px}
-.pool-badge{display:inline-flex;align-items:center;gap:6px;background:var(--info-bg);color:var(--info);font-size:12px;padding:4px 14px;border-radius:20px;font-weight:600;margin-bottom:16px}
-.pool-center h2{font-size:20px;font-weight:700;margin-bottom:8px}
-.pool-center p{color:var(--muted);font-size:13px;line-height:1.7}
-.pool-checklist{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-top:20px;text-align:left}
-.pool-checklist h4{font-size:13px;font-weight:600;margin-bottom:10px;color:var(--muted)}
-.pool-checklist li{font-size:13px;color:var(--text);margin-bottom:6px;padding-left:4px;list-style:none;display:flex;gap:8px}
-.pool-checklist li::before{content:"○";color:var(--muted2)}
+/* ===================== 口径说明 ===================== */
+.criteria-list { display: flex; flex-direction: column; gap: 8px; }
+.criteria-item { display: flex; align-items: flex-start; gap: 10px; font-size: 13px; }
+.criteria-item .ci-label { font-weight: 500; min-width: 90px; color: var(--ink); }
+.criteria-item .ci-val { color: var(--ink2); }
+.ci-confirmed { color: var(--ok); font-weight: 600; }
+.ci-pending { color: var(--warn); font-weight: 600; display: flex; align-items: center; gap: 4px; }
+.ci-ref { font-size: 11px; color: var(--ink3); margin-left: 4px; }
 
-/* 分页 */
-.pagination{display:flex;align-items:center;justify-content:flex-end;gap:8px;margin-top:12px;font-size:13px;color:var(--muted)}
-.btn-page{border:1px solid var(--border2);border-radius:4px;padding:4px 10px;cursor:pointer;background:var(--card);color:var(--text);transition:all .15s}
-.btn-page:hover{border-color:var(--brand);color:var(--brand)}
-.btn-page:disabled{opacity:.4;cursor:not-allowed}
+/* ===================== 统计卡 ===================== */
+.stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.stats-grid-5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+.stat-card {
+  background: var(--raised); border: 1px solid var(--rule); border-radius: var(--r);
+  padding: 16px; display: flex; flex-direction: column; gap: 4px;
+}
+.stat-card .sc-num { font-size: 28px; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1.1; }
+.stat-card .sc-lbl { font-size: 12px; color: var(--ink3); }
+.stat-card.ok    .sc-num { color: var(--ok); }
+.stat-card.alert .sc-num { color: var(--alert); }
+.stat-card.warn  .sc-num { color: var(--warn); }
 
-/* 加载遮罩 */
-.overlay{position:fixed;inset:0;background:rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;z-index:1000}
-.overlay-box{background:#fff;border-radius:12px;padding:32px 40px;text-align:center;box-shadow:var(--shadow-md)}
-.spinner{width:36px;height:36px;border:4px solid var(--border2);border-top-color:var(--brand);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 12px}
-@keyframes spin{to{transform:rotate(360deg)}}
+/* ===================== 筛选 pills ===================== */
+.filter-bar { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.filter-bar .fl-label { font-size: 12px; color: var(--ink3); font-weight: 500; }
+.pill {
+  padding: 4px 12px; border-radius: 999px; font-size: 12px; font-weight: 500;
+  border: 1px solid var(--rule); background: var(--raised); color: var(--ink2);
+  cursor: pointer; transition: background .12s, border-color .12s, color .12s;
+}
+.pill:hover { background: var(--sunk); }
+.pill.active { background: var(--brand); color: var(--on-brand); border-color: var(--brand); }
+.search-input {
+  margin-left: auto; padding: 5px 12px; border: 1px solid var(--rule); border-radius: var(--r-sm);
+  background: var(--surface); color: var(--ink); font-size: 12px; outline: none; width: 180px;
+}
+.search-input:focus { border-color: var(--brand); }
 
-/* Toast */
-.toast{position:fixed;bottom:24px;right:24px;background:#1e293b;color:#f1f5f9;padding:12px 20px;border-radius:var(--radius);font-size:13px;z-index:2000;box-shadow:var(--shadow-md);transform:translateY(80px);opacity:0;transition:all .3s}
-.toast.show{transform:translateY(0);opacity:1}
-.toast.success{background:var(--ok)}
-.toast.error{background:var(--alert)}
+/* ===================== 明细表格 ===================== */
+.tbl-wrap { overflow-x: auto; border: 1px solid var(--rule); border-radius: var(--r-sm); }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th { background: var(--sunk); color: var(--ink2); font-weight: 600; font-size: 12px; padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--rule); white-space: nowrap; }
+th.num, td.num { text-align: right; font-variant-numeric: tabular-nums; }
+td { padding: 9px 12px; border-bottom: 1px solid var(--rule-soft); color: var(--ink); vertical-align: middle; }
+tr:last-child td { border-bottom: none; }
+tr.row-ok   td { background: transparent; }
+tr.row-alert td { background: var(--alert-soft); }
+tr.row-alert td.num { color: var(--alert); font-weight: 600; }
+tr.row-warn  td { background: var(--warn-soft); }
+tr.row-warn  td.num { color: var(--warn); font-weight: 600; }
+.row-tag { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; padding: 2px 8px; border-radius: 999px; font-weight: 500; }
+.tag-ok    { background: var(--ok-soft);    color: var(--ok);    border: 1px solid var(--ok-line); }
+.tag-alert { background: var(--alert-soft); color: var(--alert); border: 1px solid var(--alert-line); }
+.tag-warn  { background: var(--warn-soft);  color: var(--warn);  border: 1px solid var(--warn-line); }
+
+/* ===================== 只读声明 Banner ===================== */
+.readonly-banner {
+  display: flex; align-items: center; gap: 10px; padding: 10px 16px;
+  background: var(--ok-soft); border: 1px solid var(--ok-line); border-radius: var(--r-sm);
+  font-size: 12px; color: var(--ok);
+}
+.readonly-banner .ico { font-size: 15px; }
+
+/* ===================== 分页 ===================== */
+.pagination { display: flex; align-items: center; justify-content: space-between; font-size: 12px; color: var(--ink3); }
+
+/* ===================== 占位页 ===================== */
+.placeholder { padding: 28px; max-width: 600px; }
+.placeholder .ph-badge {
+  display: inline-block; padding: 4px 12px; border-radius: 999px;
+  font-size: 11px; font-weight: 600; color: var(--info); background: var(--info-soft);
+  border: 1px dashed var(--info-line); margin-bottom: 14px;
+}
+.placeholder h2 { font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+.placeholder .ph-desc { color: var(--ink2); margin-bottom: 20px; line-height: 1.7; }
+.four-things .item { display: flex; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--rule-soft); }
+.four-things .item:last-child { border-bottom: none; }
+.four-things .item-label { font-weight: 600; min-width: 70px; color: var(--brand); }
+.four-things .item-desc { color: var(--ink2); font-size: 13px; }
+
+/* ===================== 页脚 ===================== */
+.page-foot { padding: 16px 28px; font-size: 11px; color: var(--ink3); border-top: 1px solid var(--rule-soft); margin-top: auto; line-height: 1.7; }
+
+/* ===================== 待确认标注浮层 ===================== */
+.pending-note {
+  display: inline-flex; align-items: center; gap: 4px; vertical-align: middle;
+  background: var(--warn-soft); color: var(--warn); border: 1px dashed var(--warn-line);
+  border-radius: 4px; padding: 1px 7px; font-size: 11px; font-weight: 500; cursor: help;
+}
+
+/* ===================== Toast ===================== */
+.toast {
+  position: fixed; bottom: 24px; right: 24px;
+  background: var(--ink); color: #fff; padding: 12px 20px;
+  border-radius: var(--r-sm); font-size: 13px; z-index: 2000;
+  box-shadow: var(--shadow); transform: translateY(80px); opacity: 0;
+  transition: all .3s ease; pointer-events: none;
+}
+.toast.show { transform: translateY(0); opacity: 1; }
+.toast.success { background: var(--ok); }
+.toast.error { background: var(--alert); }
+
+/* ===================== 加载遮罩 ===================== */
+.overlay {
+  position: fixed; inset: 0; background: rgba(35,40,56,.35);
+  display: flex; align-items: center; justify-content: center; z-index: 1000;
+}
+/* ===================== 柱状图 ===================== */
+.bar-chart { display: flex; flex-direction: column; gap: 10px; }
+.bar-row { display: flex; align-items: center; gap: 10px; font-size: 13px; }
+.bar-label { min-width: 70px; text-align: right; font-weight: 500; color: var(--ink); flex-shrink: 0; }
+.bar-track { flex: 1; height: 28px; background: var(--sunk); border-radius: 4px; position: relative; overflow: hidden; }
+.bar-fill { height: 100%; background: var(--brand); border-radius: 4px; display: flex; align-items: center; padding: 0 10px; transition: width .4s ease; min-width: 40px; }
+.bar-val { font-size: 11px; color: var(--on-brand); font-weight: 600; white-space: nowrap; }
+.bar-pct { min-width: 50px; font-size: 12px; color: var(--ink2); font-weight: 500; text-align: right; flex-shrink: 0; }
+.scope-banner { padding: 14px 18px; background: var(--warn-soft); border: 1px solid var(--warn-line); border-radius: var(--r-sm); font-size: 14px; font-weight: 600; color: var(--warn); text-align: center; }
+
+.overlay-box {
+  background: var(--raised); border-radius: var(--r-lg); padding: 32px 40px;
+  text-align: center; box-shadow: var(--shadow);
+}
+.spinner {
+  width: 36px; height: 36px; border: 4px solid var(--rule);
+  border-top-color: var(--brand); border-radius: 50%;
+  animation: spin .8s linear infinite; margin: 0 auto 12px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
 </style>
 </head>
 <body>
 
-<!-- ══ 登录页 ══════════════════════════════════════════════════════════════ -->
-<div id="screen-login">
+<!-- ==================== 登录页 ==================== -->
+<div id="login">
   <div class="login-card">
-    <div class="login-logo">
-      <h1>华辰精密制造</h1>
-      <p>HR 智能工作台</p>
-      <span class="login-badge">🔒 内网运行</span>
+    <div class="brand-row">
+      <div>
+        <h2>HR 智能工作台</h2>
+        <p class="sub">华辰精密制造有限公司</p>
+      </div>
+      <span class="chip brand"><span class="dot"></span>内网运行</span>
     </div>
-    <div class="form-group">
-      <label>用户名</label>
-      <input id="inp-user" type="text" placeholder="请输入用户名" value="hr01" autocomplete="username">
+
+    <div class="field">
+      <label for="lgUser">用户名</label>
+      <input id="lgUser" type="text" placeholder="请输入用户名" autocomplete="username">
     </div>
-    <div class="form-group">
-      <label>密码</label>
-      <input id="inp-pass" type="password" placeholder="请输入密码" value="hr123456" autocomplete="current-password">
+    <div class="field">
+      <label for="lgPass">口令</label>
+      <input id="lgPass" type="password" placeholder="请输入口令" autocomplete="current-password">
     </div>
-    <p id="login-error" class="error-msg"></p>
-    <button class="btn-primary" onclick="doLogin()">登录</button>
-    <p class="login-hint">hr01/hr123456 · fin01/fin123456 · admin/admin888</p>
+    <p id="login-error" class="login-error"></p>
+    <button class="btn pri" id="lgBtn" style="width:100%;justify-content:center;margin-top:6px" onclick="doLogin()">登录</button>
+
+    <div class="demo-accts">
+      <div class="lbl">内网试用账号</div>
+      <p><code>hr01 / hr123456</code><span>HR 专员</span></p>
+      <p><code>fin01 / fin123456</code><span>财务复核</span></p>
+      <p><code>admin / admin888</code><span>管理员</span></p>
+    </div>
   </div>
 </div>
 
-<!-- ══ 主界面 ════════════════════════════════════════════════════════════== -->
-<div id="screen-main" class="hidden">
-
-  <!-- 左侧 Rail -->
-  <nav class="rail">
-    <div class="rail-brand">
-      <h2>华辰精密制造<br>HR 智能工作台</h2>
-      <div class="rail-status"><span class="dot"></span><span>内网运行</span></div>
-    </div>
-    <div class="rail-section">一期模块</div>
-    <div class="rail-item active" id="nav-payroll" onclick="activateModule('payroll_recon')">
-      <span class="rail-icon">⚖️</span>薪资对账
-    </div>
-    <div class="rail-section">后续需求池</div>
-    <div class="rail-item pool-item" onclick="showPool('合同到期预警')"><span class="rail-icon">📋</span>合同到期预警</div>
-    <div class="rail-item pool-item" onclick="showPool('花名册校验')"><span class="rail-icon">👥</span>花名册校验</div>
-    <div class="rail-item pool-item" onclick="showPool('考勤统计')"><span class="rail-icon">⏰</span>考勤统计</div>
-    <div class="rail-item pool-item" onclick="showPool('社保公积金核对')"><span class="rail-icon">🏦</span>社保公积金核对</div>
-    <div class="rail-item pool-item" onclick="showPool('个税代扣核对')"><span class="rail-icon">🧾</span>个税代扣核对</div>
-    <div class="rail-item pool-item" onclick="showPool('招聘漏斗分析')"><span class="rail-icon">📊</span>招聘漏斗分析</div>
-    <div class="rail-item pool-item" onclick="showPool('人员成本分析')"><span class="rail-icon">💰</span>人员成本分析</div>
-    <div class="rail-item pool-item" onclick="showPool('绩效考核汇总')"><span class="rail-icon">🎯</span>绩效考核汇总</div>
-    <div class="rail-item pool-item" onclick="showPool('培训学时统计')"><span class="rail-icon">📚</span>培训学时统计</div>
-    <div class="rail-item pool-item" onclick="showPool('离职率分析')"><span class="rail-icon">📉</span>离职率分析</div>
-    <div class="rail-item pool-item" onclick="showPool('加班费核算')"><span class="rail-icon">🕐</span>加班费核算</div>
-    <div class="rail-footer">
-      <div class="rail-user">
-        <span id="rail-username">用户</span>
-        <button class="btn-logout" onclick="doLogout()">退出</button>
-      </div>
-    </div>
-  </nav>
-
-  <!-- 主内容区 -->
-  <div class="main-content" id="main-panel">
-    <div class="topbar">
-      <h3 id="topbar-title">薪资对账</h3>
-    </div>
-    <div class="content-body">
-
-      <!-- 步骤条 -->
-      <div class="steps">
-        <div class="step active" id="step-tab-1" onclick="goStep(1)">
-          <span class="step-num">1</span>上传与核对
-        </div>
-        <div class="step" id="step-tab-2" onclick="goStep(2)">
-          <span class="step-num">2</span>结果与差异
-        </div>
-        <div class="step" id="step-tab-3" onclick="goStep(3)">
-          <span class="step-num">3</span>历史作业
-        </div>
-      </div>
-
-      <!-- 步骤一：上传 -->
-      <div id="step-1">
-        <div class="upload-grid">
-          <div>
-            <p style="font-weight:600;margin-bottom:8px;font-size:13px;color:var(--muted)">工资表</p>
-            <div class="dropzone" id="drop-payroll"
-              ondragover="ev.preventDefault();this.classList.add('drag-over')"
-              ondragleave="this.classList.remove('drag-over')"
-              ondrop="handleDrop(event,'payroll')"
-              onclick="document.getElementById('file-payroll').click()">
-              <div class="dropzone-icon">📊</div>
-              <div class="dropzone-label">点击选择或拖拽</div>
-              <div class="dropzone-hint">薪资主表 · 实发合计列</div>
-              <div class="dropzone-hint" style="color:var(--muted2);margin-top:2px">别名：实发工资 / 实发合计</div>
-              <div class="dropzone-file" id="file-payroll-name"></div>
-              <input type="file" id="file-payroll" accept=".xlsx,.xls" style="display:none"
-                onchange="handleFileInput(event,'payroll')">
-            </div>
-          </div>
-          <div>
-            <p style="font-weight:600;margin-bottom:8px;font-size:13px;color:var(--muted)">银行代发明细</p>
-            <div class="dropzone" id="drop-bank"
-              ondragover="event.preventDefault();this.classList.add('drag-over')"
-              ondragleave="this.classList.remove('drag-over')"
-              ondrop="handleDrop(event,'bank')"
-              onclick="document.getElementById('file-bank').click()">
-              <div class="dropzone-icon">🏦</div>
-              <div class="dropzone-label">点击选择或拖拽</div>
-              <div class="dropzone-hint">银行代发明细 · 实发金额列</div>
-              <div class="dropzone-hint" style="color:var(--muted2);margin-top:2px">别名：实发金额 / 代发金额</div>
-              <div class="dropzone-file" id="file-bank-name"></div>
-              <input type="file" id="file-bank" accept=".xlsx,.xls" style="display:none"
-                onchange="handleFileInput(event,'bank')">
-            </div>
-          </div>
-        </div>
-
-        <div class="period-row">
-          <label>核对期间</label>
-          <input type="month" id="inp-period" style="font-size:13px">
-        </div>
-
-        <div class="policy-box">
-          <h4>📌 核对口径说明</h4>
-          <div class="policy-item"><span class="badge-ok">✓ 已确认</span>工号优先匹配；工号缺失的行归入单边缺失</div>
-          <div class="policy-item"><span class="badge-ok">✓ 已确认</span>差额方向固定为"银行 − 工资表"（负值=银行少发）</div>
-          <div class="policy-item"><span class="badge-warn">⚠ 待确认</span>金额容差、小数位、四舍五入口径（默认：精确匹配，2位小数）</div>
-          <div class="policy-item"><span class="badge-warn">⚠ 待确认</span>同名员工处理规则（默认：重复工号阻断，转人工确认）</div>
-        </div>
-
-        <button class="btn-run" id="btn-run" onclick="startReconcile()" disabled>
-          ▶ 开始核对
-        </button>
-        <p style="color:var(--muted2);font-size:12px;margin-top:8px">请先上传两个文件</p>
-      </div>
-
-      <!-- 步骤二：结果 -->
-      <div id="step-2" class="hidden">
-        <div class="readonly-banner">
-          <span class="ico">🔒</span>
-          <span id="readonly-info">原文件只读，SHA-256 校验通过 · 系统未写回或修改任何原始文件</span>
-        </div>
-        <div class="stat-grid">
-          <div class="stat-card ok"><div class="stat-num" id="stat-match">—</div><div class="stat-label">✅ 一致</div></div>
-          <div class="stat-card alert"><div class="stat-num" id="stat-diff">—</div><div class="stat-label">🔴 金额不符</div></div>
-          <div class="stat-card warn-l"><div class="stat-num" id="stat-p">—</div><div class="stat-label">🟡 工资表有银行无</div></div>
-          <div class="stat-card warn-r"><div class="stat-num" id="stat-b">—</div><div class="stat-label">🟠 银行有工资表无</div></div>
-        </div>
-
-        <div class="action-bar">
-          <button class="btn-export" id="btn-export" onclick="exportResult()">⬇ 导出 Excel</button>
-        </div>
-
-        <div class="card">
-          <div class="filter-bar">
-            <span class="pill active" data-f="" onclick="setFilter(this,'')">全部</span>
-            <span class="pill" data-f="amount_diff,payroll_only,bank_only" onclick="setFilter(this,'amount_diff,payroll_only,bank_only')">仅差异</span>
-            <span class="pill" data-f="match" onclick="setFilter(this,'match')">一致</span>
-            <span class="pill" data-f="amount_diff" onclick="setFilter(this,'amount_diff')">金额不符</span>
-            <span class="pill" data-f="payroll_only" onclick="setFilter(this,'payroll_only')">工资表有银行无</span>
-            <span class="pill" data-f="bank_only" onclick="setFilter(this,'bank_only')">银行有工资表无</span>
-            <div class="search-box">
-              <span class="ico">🔍</span>
-              <input type="text" placeholder="工号 / 姓名" id="inp-search"
-                oninput="onSearch()" style="padding-left:28px">
-            </div>
-          </div>
-          <div class="result-table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>工号</th><th>姓名</th><th>部门</th><th>对账结果</th>
-                  <th>工资表实发</th><th>银行代发</th><th>差额（银行-工资表）</th>
-                </tr>
-              </thead>
-              <tbody id="result-tbody"></tbody>
-            </table>
-            <div id="result-no-data" class="no-data hidden">暂无匹配数据</div>
-          </div>
-          <div class="pagination">
-            <span id="page-info">—</span>
-            <button class="btn-page" id="btn-prev" onclick="changePage(-1)" disabled>‹ 上一页</button>
-            <button class="btn-page" id="btn-next" onclick="changePage(1)" disabled>下一页 ›</button>
-          </div>
-        </div>
-
-        <div class="audit-card" id="audit-card">
-          <h4>🔍 作业追溯</h4>
-          <div class="audit-item"><span class="audit-label">作业 ID</span><span id="audit-id">—</span></div>
-          <div class="audit-item"><span class="audit-label">操作人</span><span id="audit-user">—</span></div>
-          <div class="audit-item"><span class="audit-label">核对时间</span><span id="audit-time">—</span></div>
-          <div class="audit-item"><span class="audit-label">核对期间</span><span id="audit-period">—</span></div>
-          <div class="audit-item"><span class="audit-label">工资表文件</span><span id="audit-pfile">—</span></div>
-          <div class="audit-item"><span class="audit-label">银行文件</span><span id="audit-bfile">—</span></div>
-          <div class="audit-item"><span class="audit-label">文件只读</span><span id="audit-readonly">—</span></div>
-        </div>
-      </div>
-
-      <!-- 步骤三：历史 -->
-      <div id="step-3" class="hidden">
-        <div class="card">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
-            <h4 style="font-size:15px;font-weight:600">历史作业</h4>
-            <button class="btn-export" onclick="loadHistory()">🔄 刷新</button>
-          </div>
-          <div class="result-table-wrap">
-            <table class="history-table">
-              <thead>
-                <tr>
-                  <th>核对时间</th><th>核对期间</th><th>操作人</th>
-                  <th>一致</th><th>金额不符</th><th>工资表有银行无</th><th>银行有工资表无</th>
-                  <th>操作</th>
-                </tr>
-              </thead>
-              <tbody id="history-tbody"></tbody>
-            </table>
-            <div id="history-no-data" class="no-data hidden">暂无历史记录</div>
-          </div>
-        </div>
-      </div>
-
-    </div><!-- content-body -->
-  </div><!-- main-content -->
-
-  <!-- 需求池占位 -->
-  <div id="screen-pool" class="hidden" style="flex:1;min-height:100vh;align-items:center;justify-content:center;display:none">
-    <div class="pool-center">
-      <div class="pool-badge">后续需求池 · 一期不交付</div>
-      <h2 id="pool-module-name">模块名称</h2>
-      <p>该模块已纳入后续需求池，将在一期薪资对账功能验收完成后，按优先级迭代实现。</p>
-      <div class="pool-checklist">
-        <h4>开工前需要谈清楚的四件事</h4>
-        <ul>
-          <li>要哪些表？（数据来源与字段格式）</li>
-          <li>怎么算？（业务规则与口径定义）</li>
-          <li>出什么？（输出格式与导出方式）</li>
-          <li>谁能用？（角色权限与审批流程）</li>
-        </ul>
-      </div>
-      <button onclick="activateModule('payroll_recon')" style="margin-top:20px;background:var(--brand);color:#fff;border:none;border-radius:var(--radius);padding:9px 20px;cursor:pointer;font-size:13px">← 返回薪资对账</button>
+<!-- ==================== 主界面 ==================== -->
+<div id="app" class="hidden">
+  <!-- 顶部栏 -->
+  <div class="appbar">
+    <b>HR 智能工作台</b>
+    <span class="sep">|</span>
+    <span>华辰精密制造有限公司</span>
+    <span class="sep">|</span>
+    <span id="ab-phase">一期交付</span>
+    <span class="grow"></span>
+    <div class="acts">
+      <span id="ab-user" style="font-size:12px;color:var(--ink3)"></span>
+      <button class="btn sm" onclick="doLogout()">退出</button>
     </div>
   </div>
 
-</div><!-- screen-main -->
+  <div class="shell">
+    <!-- 侧边导航 -->
+    <nav class="rail">
+      <div class="brand-block">
+        <div class="co">华辰精密制造有限公司</div>
+        <div class="nm">HR 智能工作台</div>
+        <div class="env"><span class="dot"></span>内网运行 · 数据不出外网</div>
+      </div>
 
-<!-- 加载遮罩 -->
-<div class="overlay hidden" id="overlay">
-  <div class="overlay-box">
-    <div class="spinner"></div>
-    <p id="overlay-msg" style="color:var(--muted);font-size:13px">处理中，请稍候…</p>
+      <div class="navsec">
+        <div class="navlbl">一期交付</div>
+        <button class="navitem active" onclick="showModule('recon')" id="nav-recon">
+          <span class="ico">&#8865;</span> 薪资对账
+        </button>
+        <button class="navitem" onclick="showModule('contract')" id="nav-contract">
+          <span class="ico">&#128203;</span> 合同到期预警
+        </button>
+        <button class="navitem" onclick="showModule('roster')" id="nav-roster">
+          <span class="ico">&#128101;</span> 花名册校验
+        </button>
+        <button class="navitem" onclick="showModule('attendance')" id="nav-attendance">
+          <span class="ico">&#128336;</span> 考勤统计
+        </button>
+        <button class="navitem" onclick="showModule('social')" id="nav-social">
+          <span class="ico">&#127974;</span> 社保公积金核对
+        </button>
+        <button class="navitem" onclick="showModule('cost')" id="nav-cost">
+          <span class="ico">&#128176;</span> 人员成本分析
+        </button>
+      </div>
+
+      <div class="navsec">
+        <div class="navlbl">后续需求池</div>
+        <button class="navitem pool" onclick="showPool('个税代扣核对','复核个税代扣金额，降低计算和申报差错。')">&#128202; 个税代扣核对</button>
+        <button class="navitem pool" onclick="showPool('招聘漏斗分析','看清各岗位和渠道的招聘转化效率。')">&#128269; 招聘漏斗分析</button>
+        <button class="navitem pool" onclick="showPool('绩效考核汇总','统一汇总多来源评分并形成可复核的绩效结果。')">&#11088; 绩效考核汇总</button>
+        <button class="navitem pool" onclick="showPool('培训学时统计','掌握员工必修和选修完成情况，支持培训合规。')">&#128218; 培训学时统计</button>
+        <button class="navitem pool" onclick="showPool('离职率分析','观察月度和部门人员流动，定位异常离职趋势。')">&#128201; 离职率分析</button>
+        <button class="navitem pool" onclick="showPool('加班费核算','按加班类型和薪资标准核算加班费，减少人工计算。')">&#9200; 加班费核算</button>
+      </div>
+
+      <div class="rail-foot">
+        虚线模块只登记业务价值与待澄清问题，一期不交付。<br>居家外网访问不进入一期。
+      </div>
+    </nav>
+
+    <!-- 主内容 -->
+    <div class="stage">
+
+      <!-- ——— 薪资对账区 ——— -->
+      <div id="recon-wrap">
+        <div class="topbar">
+          <h1>薪资对账</h1>
+          <span class="chip brand">对账型</span>
+          <span class="grow"></span>
+          <span id="topbar-user" style="font-size:12px;color:var(--ink3)"></span>
+        </div>
+
+        <!-- 步骤条 -->
+        <div class="content" style="padding-bottom:0">
+          <div class="steps">
+            <button class="step-btn active" id="s1-btn" onclick="goStep(1)">&#9312; 上传与核对</button>
+            <button class="step-btn" id="s2-btn" onclick="goStep(2)" disabled>&#9313; 结果与差异</button>
+            <button class="step-btn" id="s3-btn" onclick="goStep(3)">&#9314; 历史作业</button>
+          </div>
+        </div>
+
+        <!-- ===== 步骤一：上传 ===== -->
+        <div class="content" id="step1">
+          <h2 style="font-size:15px;font-weight:600">上传工资表与银行代发明细</h2>
+          <p style="color:var(--ink2);font-size:13px">系统只读取文件、只标记差异，不会修改、也不会回写任何一份原始文件。</p>
+
+          <div class="upload-grid">
+            <!-- 工资表 -->
+            <div class="dropzone" id="dz-payroll" onclick="document.getElementById('f-payroll').click()"
+              ondragover="event.preventDefault();this.classList.add('drag')"
+              ondragleave="this.classList.remove('drag')"
+              ondrop="handleDrop(event,'payroll')">
+              <input type="file" id="f-payroll" accept=".xlsx,.xls" onchange="handleFile(this,'payroll')">
+              <div class="dz-icon">&#128196;</div>
+              <div class="dz-label">工资表</div>
+              <div class="dz-sub">点击选择或拖放 Excel 文件</div>
+              <div class="dz-aliases">金额列识别：实发工资 / 实发合计</div>
+              <div class="dz-file hidden" id="dz-payroll-name"></div>
+            </div>
+
+            <!-- 银行代发表 -->
+            <div class="dropzone" id="dz-bank" onclick="document.getElementById('f-bank').click()"
+              ondragover="event.preventDefault();this.classList.add('drag')"
+              ondragleave="this.classList.remove('drag')"
+              ondrop="handleDrop(event,'bank')">
+              <input type="file" id="f-bank" accept=".xlsx,.xls" onchange="handleFile(this,'bank')">
+              <div class="dz-icon">&#127974;</div>
+              <div class="dz-label">银行代发明细</div>
+              <div class="dz-sub">点击选择或拖放 Excel 文件</div>
+              <div class="dz-aliases">金额列识别：实发金额 / 代发金额</div>
+              <div class="dz-file hidden" id="dz-bank-name"></div>
+            </div>
+          </div>
+
+          <!-- 期间 + 操作 -->
+          <div class="card">
+            <div class="bd" style="display:flex;align-items:center;gap:12px">
+              <label style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:500">
+                核对期间
+                <input type="month" id="period" style="border:1px solid var(--rule);border-radius:6px;padding:6px 10px;font-size:13px;outline:none">
+              </label>
+              <span style="flex:1"></span>
+              <button class="btn sm" onclick="resetFiles()">重新选择</button>
+              <button class="btn pri" id="run-btn" disabled onclick="runRecon()">开始核对</button>
+            </div>
+          </div>
+
+          <!-- 核对口径说明 -->
+          <div class="alert-box note">
+            <span class="ico">&#8505;</span>
+            <div class="body" style="color:var(--ink)">
+              <div class="ttl" style="color:var(--ink)">核对口径</div>
+              <div class="criteria-list" style="margin-top:8px">
+                <div class="criteria-item">
+                  <span class="ci-label">员工匹配</span>
+                  <span class="ci-val"><span class="ci-confirmed">&#10003; 已确认</span> &nbsp;工号优先，不单独使用姓名 <span class="ci-ref">（D003）</span></span>
+                </div>
+                <div class="criteria-item">
+                  <span class="ci-label">工号缺失</span>
+                  <span class="ci-val"><span class="ci-confirmed">&#10003; 已确认</span> &nbsp;工号为空的行归入单边缺失</span>
+                </div>
+                <div class="criteria-item">
+                  <span class="ci-label">重复工号</span>
+                  <span class="ci-val"><span class="ci-confirmed">&#10003; 已确认</span> &nbsp;重复工号直接报错阻断，不静默合并</span>
+                </div>
+                <div class="criteria-item">
+                  <span class="ci-label">金额精度</span>
+                  <span class="ci-val">
+                    <span class="pending-note" title="D015：差异为0.01元时是否算不符？保留几位小数？如何四舍五入？">&#9888; 待确认</span>
+                    &nbsp;容差 / 小数位 / 四舍五入口径（默认精确匹配，2位小数） <span class="ci-ref">（D015）</span>
+                  </span>
+                </div>
+                <div class="criteria-item">
+                  <span class="ci-label">比较字段</span>
+                  <span class="ci-val"><span class="ci-confirmed">&#10003; 已确认</span> &nbsp;工资表「实发工资/实发合计」vs 银行「实发金额/代发金额」 <span class="ci-ref">（D004）</span></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== 步骤二：结果 ===== -->
+        <div class="content hidden" id="step2">
+          <!-- 只读声明 -->
+          <div class="readonly-banner">
+            <span class="ico">&#128274;</span>
+            <span id="readonly-text">原始工资表和银行代发表全程只读，处理前后各计算一次 SHA-256，不一致即判作业失败。<b>本次核对未修改任何原始文件。</b></span>
+          </div>
+
+          <p style="color:var(--ink2);font-size:13px" id="res-sub"></p>
+
+          <!-- 4格统计 -->
+          <div class="stats-grid">
+            <div class="stat-card ok">
+              <div class="sc-num" id="stat-match">0</div>
+              <div class="sc-lbl">一致</div>
+            </div>
+            <div class="stat-card alert">
+              <div class="sc-num" id="stat-diff" style="font-size:22px">0</div>
+              <div class="sc-lbl">金额不符</div>
+            </div>
+            <div class="stat-card warn">
+              <div class="sc-num" id="stat-p" style="font-size:22px">0</div>
+              <div class="sc-lbl">工资表有 · 银行无</div>
+            </div>
+            <div class="stat-card warn">
+              <div class="sc-num" id="stat-b" style="font-size:22px">0</div>
+              <div class="sc-lbl">银行有 · 工资表无</div>
+            </div>
+          </div>
+
+          <!-- 筛选 + 搜索 -->
+          <div class="filter-bar">
+            <span class="fl-label">筛选</span>
+            <button class="pill active" id="pill-all" onclick="setFilter(this,'')">全部</button>
+            <button class="pill" id="pill-diff" onclick="setFilter(this,'amount_diff,payroll_only,bank_only')">仅差异</button>
+            <button class="pill" id="pill-match" onclick="setFilter(this,'match')">一致</button>
+            <button class="pill" id="pill-amount" onclick="setFilter(this,'amount_diff')">金额不符</button>
+            <button class="pill" id="pill-payroll" onclick="setFilter(this,'payroll_only')">工资表有但银行无</button>
+            <button class="pill" id="pill-bank" onclick="setFilter(this,'bank_only')">银行有但工资表无</button>
+            <input type="text" class="search-input" id="search-input" placeholder="按工号或姓名查找" oninput="onSearch()">
+          </div>
+
+          <!-- 明细表 -->
+          <div class="tbl-wrap">
+            <table id="detail-table">
+              <thead>
+                <tr>
+                  <th>#</th><th>工号</th><th>姓名</th><th>部门</th><th>结果</th>
+                  <th class="num">工资表金额</th>
+                  <th class="num">银行代发金额</th>
+                  <th class="num">差额（银行&#8722;工资表）</th>
+                </tr>
+              </thead>
+              <tbody id="detail-body"></tbody>
+            </table>
+          </div>
+          <div class="pagination">
+            <div>共 <span id="row-count">0</span> 条记录</div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <span id="page-info"></span>
+              <button class="btn sm" id="btn-prev" onclick="changePage(-1)" disabled>&#8249; 上一页</button>
+              <button class="btn sm" id="btn-next" onclick="changePage(1)" disabled>下一页 &#8250;</button>
+            </div>
+          </div>
+
+          <!-- 导出 -->
+          <div style="display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap">
+            <button class="btn pri" onclick="exportResult()">&#11015; 导出 Excel 结果</button>
+          </div>
+
+          <!-- 作业追溯 -->
+          <div class="card">
+            <div class="hd">作业追溯</div>
+            <div class="bd">
+              <dl class="kv">
+                <dt>作业编号</dt><dd id="audit-id"></dd>
+                <dt>操作人</dt><dd id="audit-user"></dd>
+                <dt>处理时间</dt><dd id="audit-time"></dd>
+                <dt>工资表</dt><dd id="audit-pfile"></dd>
+                <dt>银行代发表</dt><dd id="audit-bfile"></dd>
+                <dt>核对口径</dt><dd>工号优先匹配；金额精度口径待确认（本次以差额为准展示，不做自动判定） <span class="pending-note" title="D015">&#9888; 精度口径未定</span></dd>
+              </dl>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== 步骤三：历史 ===== -->
+        <div class="content hidden" id="step3">
+          <h2 style="font-size:15px;font-weight:600">历史作业</h2>
+          <p style="color:var(--ink2);font-size:13px">每次核对都留痕：谁、什么时候、用哪两份文件、得到什么结论。</p>
+
+          <div class="tbl-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>创建时间</th><th>期间</th><th>状态</th><th>操作人</th>
+                  <th class="num">参与行数</th><th>统计摘要</th><th></th>
+                </tr>
+              </thead>
+              <tbody id="history-body"></tbody>
+            </table>
+          </div>
+
+          <div class="alert-box note" style="margin-top:4px">
+            <span class="ico">&#8505;</span>
+            <div class="body">
+              <div class="ttl">结果保留期限</div>
+              历史作业保留多久、由谁删除、是否需要归档，尚未确认。
+              <span class="pending-note" title="D016">&#9888; 待确认 D016</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ——— 合同到期预警区 ——— -->
+      <div id="contract-wrap" class="hidden">
+        <div class="topbar">
+          <h1>合同到期预警</h1>
+          <span class="chip warn">预警型</span>
+          <span class="grow"></span>
+          <span id="ca-topbar-user" style="font-size:12px;color:var(--ink3)"></span>
+        </div>
+
+        <div class="content" style="padding-bottom:0">
+          <div class="steps">
+            <button class="step-btn active" id="ca-s1-btn" onclick="caGoStep(1)">&#9312; 上传合同台账</button>
+            <button class="step-btn" id="ca-s2-btn" onclick="caGoStep(2)" disabled>&#9313; 预警结果</button>
+            <button class="step-btn" id="ca-s3-btn" onclick="caGoStep(3)">&#9314; 历史作业</button>
+          </div>
+        </div>
+
+        <!-- 步骤一：上传 -->
+        <div class="content" id="ca-step1">
+          <h2 style="font-size:15px;font-weight:600">上传员工合同台账</h2>
+          <p style="color:var(--ink2);font-size:13px">系统只读取文件，按合同结束日期计算到期天数并分级预警，不会修改原始文件。</p>
+
+          <div style="max-width:400px">
+            <div class="dropzone" id="dz-contract" onclick="document.getElementById('f-contract').click()"
+              ondragover="event.preventDefault();this.classList.add('drag')"
+              ondragleave="this.classList.remove('drag')"
+              ondrop="caHandleDrop(event)">
+              <input type="file" id="f-contract" accept=".xlsx,.xls" onchange="caHandleFile(this)">
+              <div class="dz-icon">&#128203;</div>
+              <div class="dz-label">合同台账</div>
+              <div class="dz-sub">点击选择或拖放 Excel 文件</div>
+              <div class="dz-aliases">必要列：工号、合同结束日期</div>
+              <div class="dz-file hidden" id="dz-contract-name"></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="bd" style="display:flex;align-items:center;gap:12px">
+              <span style="flex:1"></span>
+              <button class="btn sm" onclick="caResetFile()">重新选择</button>
+              <button class="btn pri" id="ca-run-btn" disabled onclick="caRun()">开始分析</button>
+            </div>
+          </div>
+
+          <div class="alert-box note">
+            <span class="ico">&#8505;</span>
+            <div class="body" style="color:var(--ink)">
+              <div class="ttl" style="color:var(--ink)">预警规则</div>
+              <div class="criteria-list" style="margin-top:8px">
+                <div class="criteria-item">
+                  <span class="ci-label">预警分级</span>
+                  <span class="ci-val"><span class="ci-confirmed">&#10003; 已确认</span> &nbsp;已过期 / 30天内 / 60天内 / 90天内 / 正常</span>
+                </div>
+                <div class="criteria-item">
+                  <span class="ci-label">基准日期</span>
+                  <span class="ci-val"><span class="ci-confirmed">&#10003; 已确认</span> &nbsp;以系统当天日期为基准计算剩余天数</span>
+                </div>
+                <div class="criteria-item">
+                  <span class="ci-label">无固定期限</span>
+                  <span class="ci-val"><span class="ci-confirmed">&#10003; 已确认</span> &nbsp;合同类型含"无固定"的归为正常，不预警</span>
+                </div>
+                <div class="criteria-item">
+                  <span class="ci-label">排序规则</span>
+                  <span class="ci-val"><span class="ci-confirmed">&#10003; 已确认</span> &nbsp;按剩余天数升序，最紧急的排最前</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 步骤二：结果 -->
+        <div class="content hidden" id="ca-step2">
+          <div class="readonly-banner">
+            <span class="ico">&#128274;</span>
+            <span id="ca-readonly-text">合同台账全程只读，处理前后各计算一次 SHA-256。<b>本次分析未修改任何原始文件。</b></span>
+          </div>
+
+          <p style="color:var(--ink2);font-size:13px" id="ca-res-sub"></p>
+
+          <div class="stats-grid-5">
+            <div class="stat-card alert">
+              <div class="sc-num" id="ca-stat-expired" style="font-size:22px">0</div>
+              <div class="sc-lbl">已过期</div>
+            </div>
+            <div class="stat-card alert">
+              <div class="sc-num" id="ca-stat-30" style="font-size:22px">0</div>
+              <div class="sc-lbl">30天内到期</div>
+            </div>
+            <div class="stat-card warn">
+              <div class="sc-num" id="ca-stat-60" style="font-size:22px">0</div>
+              <div class="sc-lbl">60天内到期</div>
+            </div>
+            <div class="stat-card warn">
+              <div class="sc-num" id="ca-stat-90" style="font-size:22px">0</div>
+              <div class="sc-lbl">90天内到期</div>
+            </div>
+            <div class="stat-card ok">
+              <div class="sc-num" id="ca-stat-normal">0</div>
+              <div class="sc-lbl">正常</div>
+            </div>
+          </div>
+
+          <div class="filter-bar">
+            <span class="fl-label">筛选</span>
+            <button class="pill active" id="ca-pill-all" onclick="caSetFilter(this,'')">全部</button>
+            <button class="pill" id="ca-pill-warn" onclick="caSetFilter(this,'expired,within_30,within_60,within_90')">需预警</button>
+            <button class="pill" id="ca-pill-expired" onclick="caSetFilter(this,'expired')">已过期</button>
+            <button class="pill" id="ca-pill-30" onclick="caSetFilter(this,'within_30')">30天内</button>
+            <button class="pill" id="ca-pill-60" onclick="caSetFilter(this,'within_60')">60天内</button>
+            <button class="pill" id="ca-pill-90" onclick="caSetFilter(this,'within_90')">90天内</button>
+            <button class="pill" id="ca-pill-normal" onclick="caSetFilter(this,'normal')">正常</button>
+            <input type="text" class="search-input" id="ca-search-input" placeholder="按工号或姓名查找" oninput="caOnSearch()">
+          </div>
+
+          <div class="tbl-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>#</th><th>工号</th><th>姓名</th><th>部门</th><th>合同类型</th>
+                  <th>开始日期</th><th>结束日期</th>
+                  <th class="num">剩余天数</th><th>预警等级</th>
+                </tr>
+              </thead>
+              <tbody id="ca-detail-body"></tbody>
+            </table>
+          </div>
+          <div class="pagination">
+            <div>共 <span id="ca-row-count">0</span> 条记录</div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <span id="ca-page-info"></span>
+              <button class="btn sm" id="ca-btn-prev" onclick="caChangePage(-1)" disabled>&#8249; 上一页</button>
+              <button class="btn sm" id="ca-btn-next" onclick="caChangePage(1)" disabled>下一页 &#8250;</button>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap">
+            <button class="btn pri" onclick="caExport()">&#11015; 导出 Excel 结果</button>
+          </div>
+
+          <div class="card">
+            <div class="hd">作业追溯</div>
+            <div class="bd">
+              <dl class="kv">
+                <dt>作业编号</dt><dd id="ca-audit-id"></dd>
+                <dt>操作人</dt><dd id="ca-audit-user"></dd>
+                <dt>分析时间</dt><dd id="ca-audit-time"></dd>
+                <dt>合同台账</dt><dd id="ca-audit-file"></dd>
+              </dl>
+            </div>
+          </div>
+        </div>
+
+        <!-- 步骤三：历史 -->
+        <div class="content hidden" id="ca-step3">
+          <h2 style="font-size:15px;font-weight:600">历史作业</h2>
+          <p style="color:var(--ink2);font-size:13px">每次分析都留痕：谁、什么时候、用哪份合同台账、预警了多少人。</p>
+
+          <div class="tbl-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>分析时间</th><th>状态</th><th>操作人</th>
+                  <th class="num">总人数</th><th>统计摘要</th><th></th>
+                </tr>
+              </thead>
+              <tbody id="ca-history-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ——— 花名册校验区 ——— -->
+      <div id="roster-wrap" class="hidden">
+        <div class="topbar">
+          <h1>花名册校验</h1>
+          <span class="chip ok">校验型</span>
+          <span class="grow"></span>
+        </div>
+
+        <div class="content" style="padding-bottom:0">
+          <div class="steps">
+            <button class="step-btn active" id="rc-s1-btn" onclick="rcGoStep(1)">&#9312; 上传花名册</button>
+            <button class="step-btn" id="rc-s2-btn" onclick="rcGoStep(2)" disabled>&#9313; 校验结果</button>
+            <button class="step-btn" id="rc-s3-btn" onclick="rcGoStep(3)">&#9314; 历史作业</button>
+          </div>
+        </div>
+
+        <!-- 步骤一：上传 -->
+        <div class="content" id="rc-step1">
+          <h2 style="font-size:15px;font-weight:600">上传员工花名册</h2>
+          <p style="color:var(--ink2);font-size:13px">系统只读取文件，检查必填缺失、工号/证件重复、性别与证件矛盾，不会修改原始文件。</p>
+
+          <div style="max-width:400px">
+            <div class="dropzone" id="dz-roster" onclick="document.getElementById('f-roster').click()"
+              ondragover="event.preventDefault();this.classList.add('drag')"
+              ondragleave="this.classList.remove('drag')"
+              ondrop="rcHandleDrop(event)">
+              <input type="file" id="f-roster" accept=".xlsx,.xls" onchange="rcHandleFile(this)">
+              <div class="dz-icon">&#128101;</div>
+              <div class="dz-label">员工花名册</div>
+              <div class="dz-sub">点击选择或拖放 Excel 文件</div>
+              <div class="dz-aliases">必要列：工号、姓名、性别、出生日期、身份证号、部门、入职日期</div>
+              <div class="dz-file hidden" id="dz-roster-name"></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="bd" style="display:flex;align-items:center;gap:12px">
+              <span style="flex:1"></span>
+              <button class="btn sm" onclick="rcResetFile()">重新选择</button>
+              <button class="btn pri" id="rc-run-btn" disabled onclick="rcRun()">开始校验</button>
+            </div>
+          </div>
+
+          <div class="alert-box note">
+            <span class="ico">&#8505;</span>
+            <div class="body" style="color:var(--ink)">
+              <div class="ttl" style="color:var(--ink)">校验规则</div>
+              <div class="criteria-list" style="margin-top:8px">
+                <div class="criteria-item">
+                  <span class="ci-label">必填检查</span>
+                  <span class="ci-val"><span class="ci-confirmed">&#10003;</span> 7 个必填字段缺失即报错</span>
+                </div>
+                <div class="criteria-item">
+                  <span class="ci-label">重复检查</span>
+                  <span class="ci-val"><span class="ci-confirmed">&#10003;</span> 工号重复、身份证号重复</span>
+                </div>
+                <div class="criteria-item">
+                  <span class="ci-label">矛盾检查</span>
+                  <span class="ci-val"><span class="ci-confirmed">&#10003;</span> 性别 vs 证件号第17位、出生日期 vs 证件号生日段</span>
+                </div>
+                <div class="criteria-item">
+                  <span class="ci-label">隐私保护</span>
+                  <span class="ci-val"><span class="ci-confirmed">&#10003;</span> 页面脱敏显示身份证号，导出保留完整</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 步骤二：结果 -->
+        <div class="content hidden" id="rc-step2">
+          <div class="readonly-banner">
+            <span class="ico">&#128274;</span>
+            <span id="rc-readonly-text">花名册全程只读，处理前后各计算一次 SHA-256。<b>本次校验未修改任何原始文件。</b></span>
+          </div>
+
+          <p style="color:var(--ink2);font-size:13px" id="rc-res-sub"></p>
+
+          <div class="stats-grid-5">
+            <div class="stat-card">
+              <div class="sc-num" id="rc-stat-total" style="font-size:22px">0</div>
+              <div class="sc-lbl">总人数</div>
+            </div>
+            <div class="stat-card alert">
+              <div class="sc-num" id="rc-stat-missing" style="font-size:22px">0</div>
+              <div class="sc-lbl">缺失必填项</div>
+            </div>
+            <div class="stat-card alert">
+              <div class="sc-num" id="rc-stat-dup" style="font-size:22px">0</div>
+              <div class="sc-lbl">重复</div>
+            </div>
+            <div class="stat-card warn">
+              <div class="sc-num" id="rc-stat-contra" style="font-size:22px">0</div>
+              <div class="sc-lbl">矛盾</div>
+            </div>
+            <div class="stat-card ok">
+              <div class="sc-num" id="rc-stat-clean">0</div>
+              <div class="sc-lbl">正常</div>
+            </div>
+          </div>
+
+          <div class="filter-bar">
+            <span class="fl-label">筛选</span>
+            <button class="pill active" id="rc-pill-all" onclick="rcSetFilter(this,'')">全部</button>
+            <button class="pill" onclick="rcSetFilter(this,'missing_field,duplicate,contradiction')">有问题</button>
+            <button class="pill" onclick="rcSetFilter(this,'missing_field')">缺失</button>
+            <button class="pill" onclick="rcSetFilter(this,'duplicate')">重复</button>
+            <button class="pill" onclick="rcSetFilter(this,'contradiction')">矛盾</button>
+            <button class="pill" onclick="rcSetFilter(this,'clean')">正常</button>
+            <input type="text" class="search-input" id="rc-search-input" placeholder="按工号或姓名查找" oninput="rcOnSearch()">
+          </div>
+
+          <div class="tbl-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>#</th><th>工号</th><th>姓名</th><th>性别</th><th>出生日期</th>
+                  <th>身份证号</th><th>部门</th><th>入职日期</th><th>问题类型</th><th>问题详情</th>
+                </tr>
+              </thead>
+              <tbody id="rc-detail-body"></tbody>
+            </table>
+          </div>
+          <div class="pagination">
+            <div>共 <span id="rc-row-count">0</span> 条记录</div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <span id="rc-page-info"></span>
+              <button class="btn sm" id="rc-btn-prev" onclick="rcChangePage(-1)" disabled>&#8249; 上一页</button>
+              <button class="btn sm" id="rc-btn-next" onclick="rcChangePage(1)" disabled>下一页 &#8250;</button>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap">
+            <button class="btn pri" onclick="rcExport()">&#11015; 导出 Excel 结果</button>
+          </div>
+
+          <div class="card">
+            <div class="hd">作业追溯</div>
+            <div class="bd">
+              <dl class="kv">
+                <dt>作业编号</dt><dd id="rc-audit-id"></dd>
+                <dt>操作人</dt><dd id="rc-audit-user"></dd>
+                <dt>校验时间</dt><dd id="rc-audit-time"></dd>
+                <dt>花名册文件</dt><dd id="rc-audit-file"></dd>
+              </dl>
+            </div>
+          </div>
+        </div>
+
+        <!-- 步骤三：历史 -->
+        <div class="content hidden" id="rc-step3">
+          <h2 style="font-size:15px;font-weight:600">历史作业</h2>
+          <p style="color:var(--ink2);font-size:13px">每次校验都留痕：谁、什么时候、用哪份花名册、发现了多少问题。</p>
+
+          <div class="tbl-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>校验时间</th><th>状态</th><th>操作人</th>
+                  <th class="num">总人数</th><th>统计摘要</th><th></th>
+                </tr>
+              </thead>
+              <tbody id="rc-history-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ——— 考勤统计区 ——— -->
+      <div id="attendance-wrap" class="hidden">
+        <div class="topbar">
+          <h1>考勤统计</h1>
+          <span class="chip warn">分析型</span>
+          <span class="grow"></span>
+        </div>
+
+        <div class="content" style="padding-bottom:0">
+          <div class="steps">
+            <button class="step-btn active" id="at-s1-btn" onclick="atGoStep(1)">&#9312; 上传打卡明细</button>
+            <button class="step-btn" id="at-s2-btn" onclick="atGoStep(2)" disabled>&#9313; 考勤结果</button>
+            <button class="step-btn" id="at-s3-btn" onclick="atGoStep(3)">&#9314; 历史作业</button>
+          </div>
+        </div>
+
+        <!-- 步骤一：上传 -->
+        <div class="content" id="at-step1">
+          <h2 style="font-size:15px;font-weight:600">上传打卡明细</h2>
+          <p style="color:var(--ink2);font-size:13px">系统只读取文件，按班次规则判断考勤状态，不会修改原始文件。</p>
+
+          <div style="display:flex;gap:24px;flex-wrap:wrap;align-items:flex-start">
+            <div style="max-width:400px;flex:1">
+              <div class="dropzone" id="dz-attendance" onclick="document.getElementById('f-attendance').click()"
+                ondragover="event.preventDefault();this.classList.add('drag')"
+                ondragleave="this.classList.remove('drag')"
+                ondrop="atHandleDrop(event)">
+                <input type="file" id="f-attendance" accept=".xlsx,.xls" onchange="atHandleFile(this)">
+                <div class="dz-icon">&#128336;</div>
+                <div class="dz-label">打卡明细</div>
+                <div class="dz-sub">点击选择或拖放 Excel 文件</div>
+                <div class="dz-aliases">必要列：日期、工号、上班打卡、下班打卡</div>
+                <div class="dz-file hidden" id="dz-attendance-name"></div>
+              </div>
+            </div>
+
+            <div class="card" style="flex:0 0 260px">
+              <div class="hd">班次配置</div>
+              <div class="bd">
+                <div style="margin-bottom:10px">
+                  <label style="font-size:12px;color:var(--ink2);display:block;margin-bottom:4px">上班时间</label>
+                  <input type="time" id="at-shift-start" value="08:30" style="padding:6px 10px;border:1px solid var(--line);border-radius:6px;font-size:13px;width:100%">
+                </div>
+                <div style="margin-bottom:10px">
+                  <label style="font-size:12px;color:var(--ink2);display:block;margin-bottom:4px">下班时间</label>
+                  <input type="time" id="at-shift-end" value="17:30" style="padding:6px 10px;border:1px solid var(--line);border-radius:6px;font-size:13px;width:100%">
+                </div>
+                <div>
+                  <label style="font-size:12px;color:var(--ink2);display:block;margin-bottom:4px">加班起算阈值（分钟）</label>
+                  <input type="number" id="at-ot-threshold" value="30" min="0" max="120" style="padding:6px 10px;border:1px solid var(--line);border-radius:6px;font-size:13px;width:100%">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="bd" style="display:flex;align-items:center;gap:12px">
+              <span style="flex:1"></span>
+              <button class="btn sm" onclick="atResetFile()">重新选择</button>
+              <button class="btn pri" id="at-run-btn" disabled onclick="atRun()">开始分析</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 步骤二：结果 -->
+        <div class="content hidden" id="at-step2">
+          <div class="readonly-banner">
+            <span class="ico">&#128274;</span>
+            <span id="at-readonly-text">打卡明细全程只读，SHA-256 校验通过。</span>
+          </div>
+
+          <p style="color:var(--ink2);font-size:13px" id="at-res-sub"></p>
+
+          <div class="stats-grid-5">
+            <div class="stat-card">
+              <div class="sc-num" id="at-stat-persons" style="font-size:22px">0</div>
+              <div class="sc-lbl">总人数</div>
+            </div>
+            <div class="stat-card alert">
+              <div class="sc-num" id="at-stat-late" style="font-size:22px">0</div>
+              <div class="sc-lbl">迟到</div>
+            </div>
+            <div class="stat-card alert">
+              <div class="sc-num" id="at-stat-early" style="font-size:22px">0</div>
+              <div class="sc-lbl">早退</div>
+            </div>
+            <div class="stat-card warn">
+              <div class="sc-num" id="at-stat-missing" style="font-size:22px">0</div>
+              <div class="sc-lbl">缺卡</div>
+            </div>
+            <div class="stat-card ok">
+              <div class="sc-num" id="at-stat-ot">0</div>
+              <div class="sc-lbl">加班</div>
+            </div>
+          </div>
+
+          <div class="filter-bar">
+            <span class="fl-label">视图</span>
+            <button class="pill active" id="at-tab-summary" onclick="atSwitchView('summary')">人员汇总</button>
+            <button class="pill" id="at-tab-detail" onclick="atSwitchView('detail')">逐日明细</button>
+            <span style="width:1px;height:20px;background:var(--line);margin:0 8px"></span>
+            <span class="fl-label">筛选</span>
+            <button class="pill active" id="at-pill-all" onclick="atSetFilter(this,'')">全部</button>
+            <button class="pill" onclick="atSetFilter(this,'late')">迟到</button>
+            <button class="pill" onclick="atSetFilter(this,'early')">早退</button>
+            <button class="pill" onclick="atSetFilter(this,'missing_punch')">缺卡</button>
+            <button class="pill" onclick="atSetFilter(this,'overtime')">加班</button>
+            <button class="pill" onclick="atSetFilter(this,'normal')">正常</button>
+            <input type="text" class="search-input" id="at-search-input" placeholder="按工号或姓名查找" oninput="atOnSearch()">
+          </div>
+
+          <div class="tbl-wrap">
+            <table>
+              <thead id="at-thead"></thead>
+              <tbody id="at-detail-body"></tbody>
+            </table>
+          </div>
+          <div class="pagination">
+            <div>共 <span id="at-row-count">0</span> 条记录</div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <span id="at-page-info"></span>
+              <button class="btn sm" id="at-btn-prev" onclick="atChangePage(-1)" disabled>&#8249; 上一页</button>
+              <button class="btn sm" id="at-btn-next" onclick="atChangePage(1)" disabled>下一页 &#8250;</button>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap">
+            <button class="btn pri" onclick="atExport()">&#11015; 导出 Excel 结果</button>
+          </div>
+
+          <div class="card">
+            <div class="hd">作业追溯</div>
+            <div class="bd">
+              <dl class="kv">
+                <dt>作业编号</dt><dd id="at-audit-id"></dd>
+                <dt>操作人</dt><dd id="at-audit-user"></dd>
+                <dt>分析时间</dt><dd id="at-audit-time"></dd>
+                <dt>班次</dt><dd id="at-audit-shift"></dd>
+              </dl>
+            </div>
+          </div>
+        </div>
+
+        <!-- 步骤三：历史 -->
+        <div class="content hidden" id="at-step3">
+          <h2 style="font-size:15px;font-weight:600">历史作业</h2>
+          <p style="color:var(--ink2);font-size:13px">每次分析都留痕。</p>
+
+          <div class="tbl-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>分析时间</th><th>状态</th><th>操作人</th>
+                  <th class="num">打卡记录数</th><th>统计摘要</th><th></th>
+                </tr>
+              </thead>
+              <tbody id="at-history-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ——— 社保公积金核对区 ——— -->
+      <div id="social-wrap" class="hidden">
+        <div class="topbar">
+          <h1>社保公积金核对</h1>
+          <span class="chip brand">对账型</span>
+          <span class="grow"></span>
+        </div>
+
+        <div class="content" style="padding-bottom:0">
+          <div class="steps">
+            <button class="step-btn active" id="si-s1-btn" onclick="siGoStep(1)">&#9312; 上传与核对</button>
+            <button class="step-btn" id="si-s2-btn" onclick="siGoStep(2)" disabled>&#9313; 核对结果</button>
+            <button class="step-btn" id="si-s3-btn" onclick="siGoStep(3)">&#9314; 历史作业</button>
+          </div>
+        </div>
+
+        <!-- 步骤一：上传 -->
+        <div class="content" id="si-step1">
+          <h2 style="font-size:15px;font-weight:600">上传工资表与社保申报表</h2>
+          <p style="color:var(--ink2);font-size:13px">系统只读取文件，按工号匹配后比较社保和公积金的基数与金额，不会修改原始文件。</p>
+
+          <div class="upload-grid">
+            <div class="dropzone" id="dz-si-payroll" onclick="document.getElementById('f-si-payroll').click()"
+              ondragover="event.preventDefault();this.classList.add('drag')"
+              ondragleave="this.classList.remove('drag')"
+              ondrop="siHandleDrop(event,'payroll')">
+              <input type="file" id="f-si-payroll" accept=".xlsx,.xls" onchange="siHandleFile(this,'payroll')">
+              <div class="dz-icon">&#128196;</div>
+              <div class="dz-label">工资表</div>
+              <div class="dz-sub">点击选择或拖放 Excel 文件</div>
+              <div class="dz-aliases">需含：工号、社保基数、公积金基数等列</div>
+              <div class="dz-file hidden" id="dz-si-payroll-name"></div>
+            </div>
+            <div class="dropzone" id="dz-si-social" onclick="document.getElementById('f-si-social').click()"
+              ondragover="event.preventDefault();this.classList.add('drag')"
+              ondragleave="this.classList.remove('drag')"
+              ondrop="siHandleDrop(event,'social')">
+              <input type="file" id="f-si-social" accept=".xlsx,.xls" onchange="siHandleFile(this,'social')">
+              <div class="dz-icon">&#127974;</div>
+              <div class="dz-label">社保申报表</div>
+              <div class="dz-sub">点击选择或拖放 Excel 文件</div>
+              <div class="dz-aliases">需含：工号、社保缴费基数、公积金缴费基数等列</div>
+              <div class="dz-file hidden" id="dz-si-social-name"></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="bd" style="display:flex;align-items:center;gap:12px">
+              <span style="flex:1"></span>
+              <button class="btn sm" onclick="siResetFiles()">重新选择</button>
+              <button class="btn pri" id="si-run-btn" disabled onclick="siRun()">开始核对</button>
+            </div>
+          </div>
+
+          <div class="alert-box note">
+            <span class="ico">&#8505;</span>
+            <div class="body" style="color:var(--ink)">
+              <div class="ttl" style="color:var(--ink)">核对口径</div>
+              <div class="criteria-list" style="margin-top:8px">
+                <div class="criteria-item">
+                  <span class="ci-label">匹配方式</span>
+                  <span class="ci-val"><span class="ci-confirmed">&#10003; 已确认</span> &nbsp;按工号匹配（归一化后比较）</span>
+                </div>
+                <div class="criteria-item">
+                  <span class="ci-label">比较字段</span>
+                  <span class="ci-val"><span class="ci-confirmed">&#10003; 已确认</span> &nbsp;社保基数、公积金基数、社保个人、社保单位、公积金个人、公积金单位</span>
+                </div>
+                <div class="criteria-item">
+                  <span class="ci-label">差异分类</span>
+                  <span class="ci-val"><span class="ci-confirmed">&#10003; 已确认</span> &nbsp;基数差异（优先）&gt; 金额差异 &gt; 单边缺失</span>
+                </div>
+                <div class="criteria-item">
+                  <span class="ci-label">重复工号</span>
+                  <span class="ci-val"><span class="ci-confirmed">&#10003; 已确认</span> &nbsp;重复工号直接报错阻断</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 步骤二：结果 -->
+        <div class="content hidden" id="si-step2">
+          <div class="readonly-banner">
+            <span class="ico">&#128274;</span>
+            <span id="si-readonly-text">工资表和社保申报表全程只读，SHA-256 校验通过。<b>本次核对未修改任何原始文件。</b></span>
+          </div>
+
+          <p style="color:var(--ink2);font-size:13px" id="si-res-sub"></p>
+
+          <div class="stats-grid-5">
+            <div class="stat-card ok">
+              <div class="sc-num" id="si-stat-match">0</div>
+              <div class="sc-lbl">一致</div>
+            </div>
+            <div class="stat-card alert">
+              <div class="sc-num" id="si-stat-base" style="font-size:22px">0</div>
+              <div class="sc-lbl">基数差异</div>
+            </div>
+            <div class="stat-card alert">
+              <div class="sc-num" id="si-stat-amount" style="font-size:22px">0</div>
+              <div class="sc-lbl">金额差异</div>
+            </div>
+            <div class="stat-card warn">
+              <div class="sc-num" id="si-stat-ponly" style="font-size:22px">0</div>
+              <div class="sc-lbl">工资表有·社保无</div>
+            </div>
+            <div class="stat-card warn">
+              <div class="sc-num" id="si-stat-sonly" style="font-size:22px">0</div>
+              <div class="sc-lbl">社保有·工资表无</div>
+            </div>
+          </div>
+
+          <div class="filter-bar">
+            <span class="fl-label">筛选</span>
+            <button class="pill active" id="si-pill-all" onclick="siSetFilter(this,'')">全部</button>
+            <button class="pill" onclick="siSetFilter(this,'base_diff,amount_diff,payroll_only,social_only')">仅差异</button>
+            <button class="pill" onclick="siSetFilter(this,'match')">一致</button>
+            <button class="pill" onclick="siSetFilter(this,'base_diff')">基数差异</button>
+            <button class="pill" onclick="siSetFilter(this,'amount_diff')">金额差异</button>
+            <button class="pill" onclick="siSetFilter(this,'payroll_only')">工资表有社保无</button>
+            <button class="pill" onclick="siSetFilter(this,'social_only')">社保有工资表无</button>
+            <input type="text" class="search-input" id="si-search-input" placeholder="按工号或姓名查找" oninput="siOnSearch()">
+          </div>
+
+          <div class="tbl-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>#</th><th>工号</th><th>姓名</th><th>部门</th><th>核对结果</th>
+                  <th class="num">工资表社保基数</th><th class="num">社保表社保基数</th><th class="num">差</th>
+                  <th class="num">工资表公积金基数</th><th class="num">社保表公积金基数</th><th class="num">差</th>
+                  <th class="num">工资表社保个人</th><th class="num">社保表社保个人</th><th class="num">差</th>
+                  <th class="num">工资表社保单位</th><th class="num">社保表社保单位</th><th class="num">差</th>
+                  <th class="num">工资表公积金个人</th><th class="num">社保表公积金个人</th><th class="num">差</th>
+                  <th class="num">工资表公积金单位</th><th class="num">社保表公积金单位</th><th class="num">差</th>
+                  <th>差异字段</th>
+                </tr>
+              </thead>
+              <tbody id="si-detail-body"></tbody>
+            </table>
+          </div>
+          <div class="pagination">
+            <div>共 <span id="si-row-count">0</span> 条记录</div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <span id="si-page-info"></span>
+              <button class="btn sm" id="si-btn-prev" onclick="siChangePage(-1)" disabled>&#8249; 上一页</button>
+              <button class="btn sm" id="si-btn-next" onclick="siChangePage(1)" disabled>下一页 &#8250;</button>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap">
+            <button class="btn pri" onclick="siExport()">&#11015; 导出 Excel 结果</button>
+          </div>
+
+          <div class="card">
+            <div class="hd">作业追溯</div>
+            <div class="bd">
+              <dl class="kv">
+                <dt>作业编号</dt><dd id="si-audit-id"></dd>
+                <dt>操作人</dt><dd id="si-audit-user"></dd>
+                <dt>核对时间</dt><dd id="si-audit-time"></dd>
+                <dt>工资表</dt><dd id="si-audit-pfile"></dd>
+                <dt>社保申报表</dt><dd id="si-audit-sfile"></dd>
+              </dl>
+            </div>
+          </div>
+        </div>
+
+        <!-- 步骤三：历史 -->
+        <div class="content hidden" id="si-step3">
+          <h2 style="font-size:15px;font-weight:600">历史作业</h2>
+          <p style="color:var(--ink2);font-size:13px">每次核对都留痕：谁、什么时候、用哪两份文件、比对了多少人。</p>
+
+          <div class="tbl-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>核对时间</th><th>状态</th><th>操作人</th>
+                  <th class="num">总人数</th><th>统计摘要</th><th></th>
+                </tr>
+              </thead>
+              <tbody id="si-history-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ——— 人员成本分析区 ——— -->
+      <div id="cost-wrap" class="hidden">
+        <div class="topbar">
+          <h1>人员成本分析</h1>
+          <span class="chip warn">分析型</span>
+          <span class="grow"></span>
+        </div>
+
+        <div class="content" style="padding-bottom:0">
+          <div class="steps">
+            <button class="step-btn active" id="ca2-s1-btn" onclick="ca2GoStep(1)">&#9312; 上传人员表</button>
+            <button class="step-btn" id="ca2-s2-btn" onclick="ca2GoStep(2)" disabled>&#9313; 分析结果</button>
+            <button class="step-btn" id="ca2-s3-btn" onclick="ca2GoStep(3)">&#9314; 历史作业</button>
+          </div>
+        </div>
+
+        <!-- 步骤一：上传 -->
+        <div class="content" id="ca2-step1">
+          <h2 style="font-size:15px;font-weight:600">上传在职人员表</h2>
+          <p style="color:var(--ink2);font-size:13px">系统只读取文件，按部门和职级汇总人数与月薪成本，不会修改原始文件。</p>
+
+          <div style="max-width:400px">
+            <div class="dropzone" id="dz-staff" onclick="document.getElementById('f-staff').click()"
+              ondragover="event.preventDefault();this.classList.add('drag')"
+              ondragleave="this.classList.remove('drag')"
+              ondrop="ca2HandleDrop(event)">
+              <input type="file" id="f-staff" accept=".xlsx,.xls" onchange="ca2HandleFile(this)">
+              <div class="dz-icon">&#128176;</div>
+              <div class="dz-label">在职人员表</div>
+              <div class="dz-sub">点击选择或拖放 Excel 文件</div>
+              <div class="dz-aliases">需含：部门、职级、月薪</div>
+              <div class="dz-file hidden" id="dz-staff-name"></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="bd" style="display:flex;align-items:center;gap:12px">
+              <span style="flex:1"></span>
+              <button class="btn sm" onclick="ca2ResetFile()">重新选择</button>
+              <button class="btn pri" id="ca2-run-btn" disabled onclick="ca2Run()">开始分析</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 步骤二：结果 -->
+        <div class="content hidden" id="ca2-step2">
+          <div class="readonly-banner">
+            <span class="ico">&#128274;</span>
+            <span id="ca2-readonly-text">人员表全程只读，SHA-256 校验通过。</span>
+          </div>
+
+          <div class="scope-banner" id="ca2-scope">统计口径：月薪合计，不含奖金和社保</div>
+
+          <p style="color:var(--ink2);font-size:13px" id="ca2-res-sub"></p>
+
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="sc-num" id="ca2-stat-persons" style="font-size:22px">0</div>
+              <div class="sc-lbl">总人数</div>
+            </div>
+            <div class="stat-card">
+              <div class="sc-num" id="ca2-stat-depts" style="font-size:22px">0</div>
+              <div class="sc-lbl">部门数</div>
+            </div>
+            <div class="stat-card ok">
+              <div class="sc-num" id="ca2-stat-total" style="font-size:22px">0</div>
+              <div class="sc-lbl">总月薪</div>
+            </div>
+            <div class="stat-card">
+              <div class="sc-num" id="ca2-stat-avg" style="font-size:22px">0</div>
+              <div class="sc-lbl">人均月薪</div>
+            </div>
+          </div>
+
+          <!-- 部门成本占比柱状图 -->
+          <div class="card">
+            <div class="hd">部门成本占比</div>
+            <div class="bd">
+              <div class="bar-chart" id="ca2-bar-chart"></div>
+            </div>
+          </div>
+
+          <!-- tab 切换 -->
+          <div class="filter-bar">
+            <span class="fl-label">视图</span>
+            <button class="pill active" id="ca2-tab-dept" onclick="ca2SwitchView('dept')">部门汇总</button>
+            <button class="pill" id="ca2-tab-level" onclick="ca2SwitchView('level')">部门 x 职级</button>
+            <button class="pill" id="ca2-tab-person" onclick="ca2SwitchView('person')">人员明细</button>
+          </div>
+
+          <div class="tbl-wrap">
+            <table>
+              <thead id="ca2-thead"></thead>
+              <tbody id="ca2-detail-body"></tbody>
+            </table>
+          </div>
+
+          <div style="display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap">
+            <button class="btn pri" onclick="ca2Export()">&#11015; 导出 Excel 结果</button>
+          </div>
+
+          <div class="card">
+            <div class="hd">作业追溯</div>
+            <div class="bd">
+              <dl class="kv">
+                <dt>作业编号</dt><dd id="ca2-audit-id"></dd>
+                <dt>操作人</dt><dd id="ca2-audit-user"></dd>
+                <dt>分析时间</dt><dd id="ca2-audit-time"></dd>
+                <dt>统计口径</dt><dd id="ca2-audit-scope"></dd>
+              </dl>
+            </div>
+          </div>
+        </div>
+
+        <!-- 步骤三：历史 -->
+        <div class="content hidden" id="ca2-step3">
+          <h2 style="font-size:15px;font-weight:600">历史作业</h2>
+          <p style="color:var(--ink2);font-size:13px">每次分析都留痕。</p>
+
+          <div class="tbl-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>分析时间</th><th>状态</th><th>操作人</th>
+                  <th class="num">总人数</th><th>统计摘要</th><th></th>
+                </tr>
+              </thead>
+              <tbody id="ca2-history-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ——— 后续需求池占位 ——— -->
+      <div id="pool-wrap" class="hidden">
+        <div class="placeholder">
+          <div class="ph-badge">后续需求池 · 一期不交付</div>
+          <h2 id="pool-name">模块名</h2>
+          <p class="ph-desc" id="pool-desc">业务价值说明</p>
+
+          <div class="alert-box note" style="margin-bottom:16px">
+            <span class="ico">&#8505;</span>
+            <div class="body">
+              <div class="ttl">界面已就位，处理逻辑尚未实现</div>
+              本模块进入一期后续需求池，需要先完成以下四件事才能开工。
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="hd">开工前需要先谈清楚的四件事</div>
+            <div class="bd four-things">
+              <div class="item">
+                <div class="item-label">要哪些表</div>
+                <div class="item-desc">需要哪几份表、由谁提供、多久更新一次</div>
+              </div>
+              <div class="item">
+                <div class="item-label">怎么算</div>
+                <div class="item-desc">判定规则和边界情况，和薪资对账一样要先定口径</div>
+              </div>
+              <div class="item">
+                <div class="item-label">出什么</div>
+                <div class="item-desc">结果怎么分类、导出成什么样、给谁看</div>
+              </div>
+              <div class="item">
+                <div class="item-label">谁能用</div>
+                <div class="item-desc">谁可以上传、查看、下载</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="page-foot">
+        本系统仅标记差异，不代表已核准；审批责任仍由 HR / 财务承担。<br>
+        原始文件全程只读：处理前后各计算一次 SHA-256，不一致即判作业失败。
+      </div>
+    </div>
   </div>
 </div>
 
 <!-- Toast -->
 <div class="toast" id="toast"></div>
 
+<!-- 加载遮罩 -->
+<div class="overlay hidden" id="overlay">
+  <div class="overlay-box">
+    <div class="spinner"></div>
+    <p id="overlay-msg" style="color:var(--ink2);font-size:13px">处理中，请稍候…</p>
+  </div>
+</div>
+
 <script>
-// ── 状态 ────────────────────────────────────────────────────────────────────
+// ===================== 全局状态 =====================
 const S = {
   token: null,
   username: null,
@@ -461,158 +1510,233 @@ const S = {
   currentJobId: null,
   currentFilter: '',
   currentPage: 1,
-  pageSize: 50,
+  pageSize: 100,
   totalRows: 0,
   searchTimer: null,
+  // 合同预警状态
+  ca_currentJobId: null,
+  ca_currentFilter: '',
+  ca_currentPage: 1,
+  ca_pageSize: 100,
+  ca_totalRows: 0,
+  ca_searchTimer: null,
+  // 花名册校验状态
+  rc_currentJobId: null,
+  rc_currentFilter: '',
+  rc_currentPage: 1,
+  rc_pageSize: 100,
+  rc_totalRows: 0,
+  rc_searchTimer: null,
+  // 考勤统计状态
+  at_currentJobId: null,
+  at_currentFilter: '',
+  at_currentPage: 1,
+  at_pageSize: 100,
+  at_totalRows: 0,
+  at_searchTimer: null,
+  at_viewMode: 'summary',
+  at_allRows: [],
+  // 社保公积金核对状态
+  si_currentJobId: null,
+  si_currentFilter: '',
+  si_currentPage: 1,
+  si_pageSize: 100,
+  si_totalRows: 0,
+  si_searchTimer: null,
+  // 人员成本分析状态
+  ca2_currentJobId: null,
+  ca2_viewMode: 'dept',
+  ca2_allRows: [],
 };
 
-// ── 工具函数 ─────────────────────────────────────────────────────────────────
+// ===================== 工具函数 =====================
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function parseDownloadFilename(cd, fallback) {
+  var m = cd.match(/filename\*=UTF-8''([^;\r\n]+)/i);
+  if (m) return decodeURIComponent(m[1]);
+  var m2 = cd.match(/filename="?([^";\r\n]+)"?/i);
+  if (m2) return m2[1];
+  return fallback;
+}
+
 async function api(method, path, body, isFile) {
-  const opts = {
-    method,
-    headers: { Authorization: `Bearer ${S.token}` },
-  };
+  var opts = { method: method, headers: { Authorization: 'Bearer ' + S.token } };
   if (isFile) {
     opts.body = body;
   } else if (body) {
     opts.headers['Content-Type'] = 'application/json';
     opts.body = JSON.stringify(body);
   }
-  const res = await fetch(path, opts);
-  if (res.status === 401) { doLogout(); throw new Error('UNAUTHENTICATED'); }
+  var res = await fetch(path, opts);
+  if (res.status === 401) { doLogout(); throw new Error('登录已过期'); }
   return res;
 }
 
-function showToast(msg, type = '') {
-  const t = document.getElementById('toast');
+function showToast(msg, type) {
+  var t = document.getElementById('toast');
   t.textContent = msg;
-  t.className = `toast ${type} show`;
-  setTimeout(() => t.classList.remove('show'), 3000);
+  t.className = 'toast ' + (type || '') + ' show';
+  setTimeout(function(){ t.classList.remove('show'); }, 3000);
 }
 
-function showOverlay(msg = '处理中，请稍候…') {
-  document.getElementById('overlay-msg').textContent = msg;
+function showOverlay(msg) {
+  document.getElementById('overlay-msg').textContent = msg || '处理中，请稍候…';
   document.getElementById('overlay').classList.remove('hidden');
 }
-function hideOverlay() { document.getElementById('overlay').classList.add('hidden'); }
 
-function el(id) { return document.getElementById(id); }
+function hideOverlay() {
+  document.getElementById('overlay').classList.add('hidden');
+}
 
-// ── 认证 ─────────────────────────────────────────────────────────────────────
+// ===================== 登录 / 退出 =====================
 async function doLogin() {
-  const username = el('inp-user').value.trim();
-  const password = el('inp-pass').value.trim();
-  el('login-error').textContent = '';
-  if (!username || !password) { el('login-error').textContent = '请输入用户名和密码'; return; }
-
+  var username = document.getElementById('lgUser').value.trim();
+  var password = document.getElementById('lgPass').value.trim();
+  document.getElementById('login-error').textContent = '';
+  if (!username || !password) {
+    document.getElementById('login-error').textContent = '请输入用户名和口令';
+    return;
+  }
   showOverlay('登录中…');
   try {
-    const res = await fetch('/api/auth/login', {
+    var res = await fetch('/api/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, password }),
+      body: JSON.stringify({ username: username, password: password }),
     });
-    const data = await res.json();
-    if (!res.ok) { el('login-error').textContent = data.message || '登录失败'; return; }
+    var data = await res.json();
+    if (!res.ok) {
+      document.getElementById('login-error').textContent = data.message || '登录失败';
+      return;
+    }
     S.token = data.access_token;
     S.username = data.username;
     S.displayName = data.display_name;
-    el('rail-username').textContent = data.display_name;
-    el('screen-login').classList.add('hidden');
-    el('screen-main').classList.remove('hidden');
+    document.getElementById('ab-user').textContent = data.display_name;
+    document.getElementById('topbar-user').textContent = '操作人：' + data.display_name;
+    document.getElementById('login').classList.add('hidden');
+    document.getElementById('app').classList.remove('hidden');
     goStep(1);
   } catch (e) {
-    el('login-error').textContent = '网络错误，请检查服务是否启动';
+    document.getElementById('login-error').textContent = '网络错误，请检查服务是否启动';
   } finally {
     hideOverlay();
   }
 }
 
 function doLogout() {
-  S.token = null; S.username = null; S.currentJobId = null;
-  el('screen-main').classList.add('hidden');
-  el('screen-login').classList.remove('hidden');
+  S.token = null;
+  S.username = null;
+  S.displayName = null;
+  S.currentJobId = null;
+  document.getElementById('app').classList.add('hidden');
+  document.getElementById('login').classList.remove('hidden');
+  document.getElementById('lgPass').value = '';
+  document.getElementById('login-error').textContent = '';
 }
 
-document.addEventListener('keydown', e => {
-  if (e.key === 'Enter' && !el('screen-login').classList.contains('hidden')) doLogin();
-});
+document.getElementById('lgPass').addEventListener('keydown', function(e) { if (e.key === 'Enter') doLogin(); });
+document.getElementById('lgUser').addEventListener('keydown', function(e) { if (e.key === 'Enter') document.getElementById('lgPass').focus(); });
 
-// ── 模块切换 ─────────────────────────────────────────────────────────────────
-function activateModule(key) {
-  el('main-panel').classList.remove('hidden');
-  el('screen-pool').style.display = 'none';
-  document.querySelectorAll('.rail-item').forEach(i => i.classList.remove('active'));
-  if (key === 'payroll_recon') {
-    el('nav-payroll').classList.add('active');
-    el('topbar-title').textContent = '薪资对账';
-    goStep(1);
-  }
+// ===================== 导航切换 =====================
+function showModule(mod) {
+  var wraps = ['recon-wrap','contract-wrap','roster-wrap','attendance-wrap','social-wrap','cost-wrap','pool-wrap'];
+  wraps.forEach(function(id) { var el = document.getElementById(id); if(el) el.classList.add('hidden'); });
+  document.querySelectorAll('.navitem').forEach(function(b) { b.classList.remove('active'); });
+  var wrapId = mod === 'recon' ? 'recon-wrap' : mod === 'contract' ? 'contract-wrap' : mod === 'roster' ? 'roster-wrap' : mod === 'attendance' ? 'attendance-wrap' : mod === 'social' ? 'social-wrap' : mod === 'cost' ? 'cost-wrap' : null;
+  var navId = 'nav-' + mod;
+  if (wrapId) document.getElementById(wrapId).classList.remove('hidden');
+  var navEl = document.getElementById(navId);
+  if (navEl) navEl.classList.add('active');
 }
 
-function showPool(name) {
-  document.querySelectorAll('.rail-item').forEach(i => i.classList.remove('active'));
-  el('main-panel').classList.add('hidden');
-  const pool = el('screen-pool');
-  pool.style.display = 'flex';
-  el('pool-module-name').textContent = name;
+function showPool(name, desc) {
+  var wraps = ['recon-wrap','contract-wrap','roster-wrap','attendance-wrap','social-wrap','cost-wrap','pool-wrap'];
+  wraps.forEach(function(id) { var el = document.getElementById(id); if(el) el.classList.add('hidden'); });
+  document.getElementById('pool-wrap').classList.remove('hidden');
+  document.getElementById('pool-name').textContent = name;
+  document.getElementById('pool-desc').textContent = desc;
+  document.querySelectorAll('.navitem').forEach(function(b) { b.classList.remove('active'); });
+  event.currentTarget.classList.add('active');
 }
 
-// ── 步骤切换 ─────────────────────────────────────────────────────────────────
+// ===================== 步骤切换 =====================
 function goStep(n) {
-  [1, 2, 3].forEach(i => {
-    el(`step-${i}`).classList.toggle('hidden', i !== n);
-    const tab = el(`step-tab-${i}`);
-    tab.classList.remove('active', 'done');
-    if (i === n) tab.classList.add('active');
-    else if (i < n) tab.classList.add('done');
+  [1,2,3].forEach(function(i) {
+    document.getElementById('step' + i).classList.toggle('hidden', i !== n);
+    var btn = document.getElementById('s' + i + '-btn');
+    btn.classList.toggle('active', i === n);
   });
   if (n === 3) loadHistory();
 }
 
-// ── 文件上传 ─────────────────────────────────────────────────────────────────
-const FILES = { payroll: null, bank: null };
+// ===================== 文件上传 =====================
+var FILES = { payroll: null, bank: null };
 
-function handleDrop(ev, slot) {
-  ev.preventDefault();
-  el(`drop-${slot}`).classList.remove('drag-over');
-  const file = ev.dataTransfer.files[0];
-  if (file) acceptFile(slot, file);
+function handleFile(input, type) {
+  var file = input.files[0];
+  if (!file) return;
+  if (!file.name.match(/\.(xlsx|xls)$/i)) {
+    showToast('仅支持 Excel 文件（.xlsx / .xls）', 'error');
+    input.value = '';
+    return;
+  }
+  FILES[type] = file;
+  var dz = document.getElementById('dz-' + type);
+  var nameEl = document.getElementById('dz-' + type + '-name');
+  dz.classList.add('ready');
+  nameEl.textContent = '✓ ' + file.name;
+  nameEl.classList.remove('hidden');
+  updateRunBtn();
 }
 
-function handleFileInput(ev, slot) {
-  const file = ev.target.files[0];
-  if (file) acceptFile(slot, file);
+function handleDrop(e, type) {
+  e.preventDefault();
+  var dz = document.getElementById('dz-' + type);
+  dz.classList.remove('drag');
+  var file = e.dataTransfer.files[0];
+  if (!file) return;
+  if (!file.name.match(/\.(xlsx|xls)$/i)) {
+    showToast('仅支持 Excel 文件（.xlsx / .xls）', 'error');
+    return;
+  }
+  FILES[type] = file;
+  var nameEl = document.getElementById('dz-' + type + '-name');
+  dz.classList.add('ready');
+  nameEl.textContent = '✓ ' + file.name;
+  nameEl.classList.remove('hidden');
+  updateRunBtn();
 }
 
-function acceptFile(slot, file) {
-  if (!file.name.match(/\.(xlsx|xls)$/i)) { showToast('仅支持 Excel 文件（.xlsx / .xls）', 'error'); return; }
-  FILES[slot] = file;
-  const drop = el(`drop-${slot}`);
-  drop.classList.add('uploaded');
-  el(`file-${slot}-name`).textContent = '✓ ' + file.name;
-  checkReady();
+function updateRunBtn() {
+  document.getElementById('run-btn').disabled = !(FILES.payroll && FILES.bank);
 }
 
-function checkReady() {
-  const ready = FILES.payroll && FILES.bank;
-  el('btn-run').disabled = !ready;
-  el('btn-run').nextElementSibling.classList.toggle('hidden', ready);
+function resetFiles() {
+  ['payroll','bank'].forEach(function(t) {
+    FILES[t] = null;
+    document.getElementById('dz-' + t).classList.remove('ready', 'drag');
+    document.getElementById('dz-' + t + '-name').classList.add('hidden');
+    document.getElementById('f-' + t).value = '';
+  });
+  updateRunBtn();
 }
 
-// ── 发起核对 ─────────────────────────────────────────────────────────────────
-async function startReconcile() {
+// ===================== 发起核对 =====================
+async function runRecon() {
   if (!FILES.payroll || !FILES.bank) return;
   showOverlay('正在核对，请稍候…');
-  const fd = new FormData();
+  var fd = new FormData();
   fd.append('payroll_file', FILES.payroll);
   fd.append('bank_file', FILES.bank);
-  const period = el('inp-period').value;
+  var period = document.getElementById('period').value;
   if (period) fd.append('period', period);
 
   try {
-    const res = await api('POST', '/api/jobs', fd, true);
-    const data = await res.json();
+    var res = await api('POST', '/api/jobs', fd, true);
+    var data = await res.json();
     if (!res.ok) {
       showToast(data.message || '核对失败，请检查文件格式', 'error');
       return;
@@ -621,8 +1745,9 @@ async function startReconcile() {
     S.currentPage = 1;
     S.currentFilter = '';
     renderResult(data);
+    document.getElementById('s2-btn').disabled = false;
     goStep(2);
-    showToast('核对完成！', 'success');
+    showToast('核对完成', 'success');
   } catch (e) {
     showToast('请求失败：' + e.message, 'error');
   } finally {
@@ -630,93 +1755,159 @@ async function startReconcile() {
   }
 }
 
-// ── 渲染结果 ─────────────────────────────────────────────────────────────────
+// ===================== 渲染结果概览 =====================
 function renderResult(job) {
-  const s = job.summary || {};
-  el('stat-match').textContent = s.match ?? 0;
-  el('stat-diff').textContent = s.amount_diff ?? 0;
-  el('stat-p').textContent = s.payroll_only ?? 0;
-  el('stat-b').textContent = s.bank_only ?? 0;
+  var s = job.summary || {};
+  var matchCount = s.match || 0;
+  var diffCount = s.amount_diff || 0;
+  var pCount = s.payroll_only || 0;
+  var bCount = s.bank_only || 0;
+  var total = matchCount + diffCount + pCount + bCount;
 
-  // 审计卡
-  el('audit-id').textContent = job.id ? job.id.slice(0, 8) + '…' : '—';
-  el('audit-user').textContent = job.created_by || S.displayName || S.username;
-  el('audit-time').textContent = job.created_at || '—';
-  el('audit-period').textContent = job.period || '未指定';
-  const files = job.files || [];
-  const pf = files.find(f => f.side === 'payroll');
-  const bf = files.find(f => f.side === 'bank');
-  el('audit-pfile').textContent = pf ? pf.original_name : '—';
-  el('audit-bfile').textContent = bf ? bf.original_name : '—';
-  const verified = files.every(f => f.readonly_verified);
-  el('audit-readonly').textContent = verified ? '✅ SHA-256 校验通过，文件未被修改' : '⚠️ 校验异常';
+  document.getElementById('stat-match').textContent = matchCount;
+  document.getElementById('stat-diff').textContent = diffCount;
+  document.getElementById('stat-p').textContent = pCount;
+  document.getElementById('stat-b').textContent = bCount;
+
+  // 更新筛选按钮计数
+  document.getElementById('pill-all').textContent = '全部 (' + total + ')';
+  document.getElementById('pill-diff').textContent = '仅差异 (' + (diffCount + pCount + bCount) + ')';
+  document.getElementById('pill-match').textContent = '一致 (' + matchCount + ')';
+  document.getElementById('pill-amount').textContent = '金额不符 (' + diffCount + ')';
+  document.getElementById('pill-payroll').textContent = '工资表有但银行无 (' + pCount + ')';
+  document.getElementById('pill-bank').textContent = '银行有但工资表无 (' + bCount + ')';
+
+  // 结果副标题
+  var files = job.files || [];
+  var pf = files.find(function(f) { return f.side === 'payroll'; });
+  var bf = files.find(function(f) { return f.side === 'bank'; });
+  document.getElementById('res-sub').textContent =
+    '核对期间：' + (job.period || '未指定') +
+    ' · 工资表：' + (pf ? pf.original_name : '—') +
+    ' · 银行明细：' + (bf ? bf.original_name : '—') +
+    ' · 处理时间：' + (job.created_at || '—');
+
+  // 只读 Banner
+  var verified = files.every(function(f) { return f.readonly_verified; });
+  document.getElementById('readonly-text').innerHTML = verified
+    ? '原始工资表和银行代发表全程只读，处理前后各计算一次 SHA-256，校验一致。<b>本次核对未修改任何原始文件。</b>'
+    : '原始工资表和银行代发表全程只读，处理前后各计算一次 SHA-256。<b style="color:var(--alert)">校验异常，请检查文件。</b>';
+
+  // 作业追溯
+  document.getElementById('audit-id').innerHTML = '<code style="font-family:monospace;font-size:12px;color:var(--info)">' + esc(job.id ? job.id.slice(0, 8) + '…' : '—') + '</code>';
+  document.getElementById('audit-user').textContent = job.created_by || S.displayName || S.username || '—';
+  document.getElementById('audit-time').textContent = job.created_at || '—';
+
+  if (pf) {
+    var psha = pf.sha256_before || '';
+    document.getElementById('audit-pfile').textContent = pf.original_name +
+      '（SHA-256: ' + psha.slice(0, 4) + '…' + psha.slice(-4) +
+      (pf.readonly_verified ? '，处理前后一致 ✓' : '，校验异常 ✗') + '）';
+  } else {
+    document.getElementById('audit-pfile').textContent = '—';
+  }
+  if (bf) {
+    var bsha = bf.sha256_before || '';
+    document.getElementById('audit-bfile').textContent = bf.original_name +
+      '（SHA-256: ' + bsha.slice(0, 4) + '…' + bsha.slice(-4) +
+      (bf.readonly_verified ? '，处理前后一致 ✓' : '，校验异常 ✗') + '）';
+  } else {
+    document.getElementById('audit-bfile').textContent = '—';
+  }
 
   // 重置筛选
-  document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
-  document.querySelector('.pill[data-f=""]').classList.add('active');
-  el('inp-search').value = '';
+  document.querySelectorAll('.pill').forEach(function(p) { p.classList.remove('active'); });
+  document.getElementById('pill-all').classList.add('active');
+  document.getElementById('search-input').value = '';
+
   loadRows();
 }
 
+// ===================== 加载明细行（分页） =====================
 async function loadRows() {
   if (!S.currentJobId) return;
-  const params = new URLSearchParams({
+  var params = new URLSearchParams({
     page: S.currentPage,
     page_size: S.pageSize,
   });
-  const kw = el('inp-search').value.trim();
+  var kw = document.getElementById('search-input').value.trim();
   if (kw) params.append('keyword', kw);
   if (S.currentFilter) {
-    S.currentFilter.split(',').forEach(c => params.append('category', c));
+    S.currentFilter.split(',').forEach(function(c) { params.append('category', c); });
   }
-
-  const res = await api('GET', `/api/jobs/${S.currentJobId}/rows?${params}`);
-  const data = await res.json();
-  S.totalRows = data.total || 0;
-  renderTable(data.items || []);
-  renderPagination();
+  try {
+    var res = await api('GET', '/api/jobs/' + S.currentJobId + '/rows?' + params);
+    var data = await res.json();
+    S.totalRows = data.total || 0;
+    renderTable(data.items || []);
+    renderPagination();
+  } catch (e) {
+    showToast('加载明细失败', 'error');
+  }
 }
 
-const CAT_LABEL = {
-  match: '<span class="cat-badge cat-match">✅ 一致</span>',
-  amount_diff: '<span class="cat-badge cat-diff">🔴 金额不符</span>',
-  payroll_only: '<span class="cat-badge cat-payroll">🟡 工资表有银行无</span>',
-  bank_only: '<span class="cat-badge cat-bank">🟠 银行有工资表无</span>',
+// ===================== 渲染明细表格 =====================
+var TAG_MAP = {
+  match:        ['tag-ok',    '一致'],
+  amount_diff:  ['tag-alert', '金额不符'],
+  payroll_only: ['tag-warn',  '工资表有·银行无'],
+  bank_only:    ['tag-warn',  '银行有·工资表无'],
 };
-const ROW_CLS = { match: 'row-match', amount_diff: 'row-alert', payroll_only: 'row-warn', bank_only: 'row-warn' };
+var ROW_CLS = { match: 'row-ok', amount_diff: 'row-alert', payroll_only: 'row-warn', bank_only: 'row-warn' };
 
 function renderTable(rows) {
-  const tbody = el('result-tbody');
+  var tbody = document.getElementById('detail-body');
   if (!rows.length) {
-    tbody.innerHTML = '';
-    el('result-no-data').classList.remove('hidden');
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--ink3)">暂无匹配数据</td></tr>';
     return;
   }
-  el('result-no-data').classList.add('hidden');
-  tbody.innerHTML = rows.map(r => {
-    const delta = r.delta
-      ? `<span class="${parseFloat(r.delta) < 0 ? 'delta-neg' : 'delta-pos'}">${r.delta}</span>`
-      : '—';
-    return `<tr class="${ROW_CLS[r.category] || ''}">
-      <td>${esc(r.match_key || '')}</td>
-      <td>${esc(r.name || '')}</td>
-      <td>${esc(r.dept || '')}</td>
-      <td>${CAT_LABEL[r.category] || r.category}</td>
-      <td>${esc(r.payroll_amount || '—')}</td>
-      <td>${esc(r.bank_amount || '—')}</td>
-      <td>${delta}</td>
-    </tr>`;
+  tbody.innerHTML = rows.map(function(r, i) {
+    var cat = r.category;
+    var cls = ROW_CLS[cat] || '';
+    var tag = TAG_MAP[cat] || ['', cat];
+    var tagHtml = '<span class="row-tag ' + tag[0] + '">' + tag[1] + '</span>';
+
+    var payroll = r.payroll_amount != null
+      ? esc(r.payroll_amount)
+      : '<span style="color:var(--ink3)">—</span>';
+    var bank = r.bank_amount != null
+      ? esc(r.bank_amount)
+      : '<span style="color:var(--ink3)">—</span>';
+
+    var deltaHtml = '<span style="color:var(--ink3)">—</span>';
+    if (r.delta != null && r.delta !== '') {
+      var d = parseFloat(r.delta);
+      if (d === 0) {
+        deltaHtml = '<span style="color:var(--ink3)">0.00</span>';
+      } else {
+        var style = d > 0 ? 'color:var(--warn)' : 'color:var(--alert)';
+        deltaHtml = '<span style="' + style + '">' + esc(r.delta) + '</span>';
+      }
+    }
+
+    var idx = (S.currentPage - 1) * S.pageSize + i + 1;
+
+    return '<tr class="' + cls + '">' +
+      '<td class="num" style="color:var(--ink3)">' + idx + '</td>' +
+      '<td><code style="font-family:monospace;font-size:12px">' + esc(r.match_key || '') + '</code></td>' +
+      '<td>' + esc(r.name || '') + '</td>' +
+      '<td style="color:var(--ink2)">' + esc(r.dept || '') + '</td>' +
+      '<td>' + tagHtml + '</td>' +
+      '<td class="num">' + payroll + '</td>' +
+      '<td class="num">' + bank + '</td>' +
+      '<td class="num">' + deltaHtml + '</td>' +
+      '</tr>';
   }).join('');
 }
 
-function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-
+// ===================== 分页 =====================
 function renderPagination() {
-  const total = S.totalRows;
-  const pages = Math.ceil(total / S.pageSize) || 1;
-  el('page-info').textContent = `共 ${total} 条，第 ${S.currentPage}/${pages} 页`;
-  el('btn-prev').disabled = S.currentPage <= 1;
-  el('btn-next').disabled = S.currentPage >= pages;
+  var total = S.totalRows;
+  var pages = Math.ceil(total / S.pageSize) || 1;
+  document.getElementById('row-count').textContent = total;
+  document.getElementById('page-info').textContent = '第 ' + S.currentPage + '/' + pages + ' 页';
+  document.getElementById('btn-prev').disabled = S.currentPage <= 1;
+  document.getElementById('btn-next').disabled = S.currentPage >= pages;
 }
 
 function changePage(dir) {
@@ -724,75 +1915,1477 @@ function changePage(dir) {
   loadRows();
 }
 
-// ── 筛选 / 搜索 ──────────────────────────────────────────────────────────────
-function setFilter(el_pill, filter) {
+// ===================== 筛选 / 搜索 =====================
+function setFilter(btn, filter) {
   S.currentFilter = filter;
   S.currentPage = 1;
-  document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
-  el_pill.classList.add('active');
+  document.querySelectorAll('.pill').forEach(function(p) { p.classList.remove('active'); });
+  btn.classList.add('active');
   loadRows();
 }
 
 function onSearch() {
   clearTimeout(S.searchTimer);
-  S.searchTimer = setTimeout(() => { S.currentPage = 1; loadRows(); }, 300);
+  S.searchTimer = setTimeout(function() { S.currentPage = 1; loadRows(); }, 300);
 }
 
-// ── 导出 ─────────────────────────────────────────────────────────────────────
+// ===================== 导出 =====================
 async function exportResult() {
   if (!S.currentJobId) return;
-  const res = await api('GET', `/api/jobs/${S.currentJobId}/export`);
-  if (!res.ok) { showToast('导出失败', 'error'); return; }
-  const blob = await res.blob();
-  const cd = res.headers.get('Content-Disposition') || '';
-  const m = cd.match(/filename\*?=(?:UTF-8'')?["']?([^"';\r\n]+)/i);
-  let filename = m ? decodeURIComponent(m[1]) : '薪资对账.xlsx';
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = filename; a.click();
-  URL.revokeObjectURL(url);
-  showToast('导出成功', 'success');
+  showOverlay('正在导出…');
+  try {
+    var res = await api('GET', '/api/jobs/' + S.currentJobId + '/export');
+    if (!res.ok) { showToast('导出失败', 'error'); return; }
+    var blob = await res.blob();
+    var cd = res.headers.get('Content-Disposition') || '';
+    var filename = parseDownloadFilename(cd, '薪资对账.xlsx');
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url; a.download = filename; a.click();
+    URL.revokeObjectURL(url);
+    showToast('导出成功', 'success');
+  } catch (e) {
+    showToast('导出失败：' + e.message, 'error');
+  } finally {
+    hideOverlay();
+  }
 }
 
-// ── 历史 ─────────────────────────────────────────────────────────────────────
+// ===================== 历史作业 =====================
 async function loadHistory() {
-  const res = await api('GET', '/api/jobs?page_size=50');
-  const data = await res.json();
-  const items = data.items || [];
-  const tbody = el('history-tbody');
-  el('history-no-data').classList.toggle('hidden', items.length > 0);
-  tbody.innerHTML = items.map(j => {
-    const s = j.summary || {};
-    return `<tr>
-      <td>${j.created_at || '—'}</td>
-      <td>${j.period || '—'}</td>
-      <td>${j.created_by || '—'}</td>
-      <td style="color:var(--ok);font-weight:600">${s.match ?? '—'}</td>
-      <td style="color:var(--alert);font-weight:600">${s.amount_diff ?? '—'}</td>
-      <td style="color:var(--warn);font-weight:600">${s.payroll_only ?? '—'}</td>
-      <td style="color:#b45309;font-weight:600">${s.bank_only ?? '—'}</td>
-      <td><button onclick="viewJob('${j.id}')" style="border:1px solid var(--brand);color:var(--brand);background:none;border-radius:4px;padding:3px 10px;cursor:pointer;font-size:12px">查看</button>
-          <button onclick="exportJobById('${j.id}')" style="border:1px solid var(--ok);color:var(--ok);background:none;border-radius:4px;padding:3px 10px;cursor:pointer;font-size:12px;margin-left:4px">导出</button>
-      </td>
-    </tr>`;
-  }).join('');
+  try {
+    var res = await api('GET', '/api/jobs?module=payroll_recon&page_size=50');
+    var data = await res.json();
+    var items = data.items || [];
+    var tbody = document.getElementById('history-body');
+    if (!items.length) {
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--ink3)">暂无历史记录</td></tr>';
+      return;
+    }
+    tbody.innerHTML = items.map(function(j) {
+      var s = j.summary || {};
+      var matchCount = s.match || 0;
+      var diffCount = s.amount_diff || 0;
+      var pCount = s.payroll_only || 0;
+      var bCount = s.bank_only || 0;
+      var total = matchCount + diffCount + pCount + bCount;
+      var missing = pCount + bCount;
+      return '<tr>' +
+        '<td>' + esc(j.created_at || '—') + '</td>' +
+        '<td>' + esc(j.period || '—') + '</td>' +
+        '<td><span class="chip ok" style="font-size:11px"><span class="dot"></span>完成</span></td>' +
+        '<td>' + esc(j.created_by || '—') + '</td>' +
+        '<td class="num">' + total + '</td>' +
+        '<td style="font-size:12px;color:var(--ink2)">一致 ' + matchCount + ' · 不符 ' + diffCount + ' · 缺失 ' + missing + '</td>' +
+        '<td>' +
+          '<button class="btn sm" onclick="viewJob(\'' + j.id + '\')">查看</button> ' +
+          '<button class="btn sm" onclick="exportJobById(\'' + j.id + '\')">导出</button>' +
+        '</td>' +
+        '</tr>';
+    }).join('');
+  } catch (e) {
+    showToast('加载历史记录失败', 'error');
+  }
 }
 
 async function viewJob(jobId) {
-  const res = await api('GET', `/api/jobs/${jobId}`);
-  const data = await res.json();
-  S.currentJobId = jobId;
-  S.currentPage = 1;
-  S.currentFilter = '';
-  renderResult(data);
-  goStep(2);
+  showOverlay('加载作业…');
+  try {
+    var res = await api('GET', '/api/jobs/' + jobId);
+    var data = await res.json();
+    if (!res.ok) { showToast(data.message || '加载失败', 'error'); return; }
+    S.currentJobId = jobId;
+    S.currentPage = 1;
+    S.currentFilter = '';
+    renderResult(data);
+    document.getElementById('s2-btn').disabled = false;
+    goStep(2);
+  } catch (e) {
+    showToast('加载失败：' + e.message, 'error');
+  } finally {
+    hideOverlay();
+  }
 }
 
 async function exportJobById(jobId) {
-  const oldId = S.currentJobId;
+  var oldId = S.currentJobId;
   S.currentJobId = jobId;
   await exportResult();
   S.currentJobId = oldId;
+}
+
+// ===================== 初始化 =====================
+(function() {
+  var now = new Date();
+  var y = now.getFullYear();
+  var m = String(now.getMonth() + 1).padStart(2, '0');
+  document.getElementById('period').value = y + '-' + m;
+})();
+
+// ===================== 合同到期预警 =====================
+var CA_FILE = null;
+
+var CA_CATEGORY_LABELS = {
+  expired: '已过期', within_30: '30天内', within_60: '60天内',
+  within_90: '90天内', normal: '正常'
+};
+var CA_ROW_CLS = {
+  expired: 'row-alert', within_30: 'row-alert', within_60: 'row-warn',
+  within_90: 'row-warn', normal: 'row-ok'
+};
+
+function caGoStep(n) {
+  [1,2,3].forEach(function(i) {
+    document.getElementById('ca-step' + i).classList.toggle('hidden', i !== n);
+    var btn = document.getElementById('ca-s' + i + '-btn');
+    btn.classList.toggle('active', i === n);
+    if (i === 2) btn.disabled = !S.ca_currentJobId;
+  });
+  if (n === 3) caLoadHistory();
+}
+
+function caHandleFile(input) {
+  if (input.files && input.files[0]) {
+    CA_FILE = input.files[0];
+    var nameEl = document.getElementById('dz-contract-name');
+    nameEl.textContent = CA_FILE.name;
+    nameEl.classList.remove('hidden');
+    document.getElementById('dz-contract').classList.add('chosen');
+    document.getElementById('ca-run-btn').disabled = false;
+  }
+}
+
+function caHandleDrop(e) {
+  e.preventDefault();
+  e.currentTarget.classList.remove('drag');
+  var file = e.dataTransfer.files[0];
+  if (file) {
+    CA_FILE = file;
+    document.getElementById('f-contract').files = e.dataTransfer.files;
+    var nameEl = document.getElementById('dz-contract-name');
+    nameEl.textContent = CA_FILE.name;
+    nameEl.classList.remove('hidden');
+    document.getElementById('dz-contract').classList.add('chosen');
+    document.getElementById('ca-run-btn').disabled = false;
+  }
+}
+
+function caResetFile() {
+  CA_FILE = null;
+  document.getElementById('f-contract').value = '';
+  document.getElementById('dz-contract-name').classList.add('hidden');
+  document.getElementById('dz-contract').classList.remove('chosen');
+  document.getElementById('ca-run-btn').disabled = true;
+}
+
+async function caRun() {
+  if (!CA_FILE) return;
+  var btn = document.getElementById('ca-run-btn');
+  btn.disabled = true;
+  btn.textContent = '分析中…';
+  try {
+    var fd = new FormData();
+    fd.append('contract_file', CA_FILE);
+    var res = await fetch('/api/contract-alert/jobs', {
+      method: 'POST',
+      headers: { Authorization: 'Bearer ' + S.token },
+      body: fd
+    });
+    var data = await res.json();
+    if (!res.ok) throw new Error(data.detail || data.error || '分析失败');
+    S.ca_currentJobId = data.id;
+    caRenderResult(data);
+    caGoStep(2);
+  } catch(e) {
+    alert('分析失败：' + e.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '开始分析';
+  }
+}
+
+function caRenderResult(data) {
+  var s = data.summary || {};
+  document.getElementById('ca-stat-expired').textContent = s.expired || 0;
+  document.getElementById('ca-stat-30').textContent = s.within_30 || 0;
+  document.getElementById('ca-stat-60').textContent = s.within_60 || 0;
+  document.getElementById('ca-stat-90').textContent = s.within_90 || 0;
+  document.getElementById('ca-stat-normal').textContent = s.normal || 0;
+
+  var total = (s.expired||0) + (s.within_30||0) + (s.within_60||0) + (s.within_90||0) + (s.normal||0);
+  document.getElementById('ca-res-sub').textContent = '共 ' + total + ' 名员工，' +
+    ((s.expired||0)+(s.within_30||0)+(s.within_60||0)+(s.within_90||0)) + ' 人需关注';
+
+  var sha = (data.files && data.files[0]) || {};
+  document.getElementById('ca-readonly-text').innerHTML =
+    '合同台账全程只读，SHA-256 校验：' + (sha.sha256_before||'').substring(0,12) + '…' +
+    (sha.readonly_verified ? ' <b style="color:var(--green)">✓ 未修改</b>' : ' <b style="color:var(--red)">⚠ 文件变化</b>');
+
+  document.getElementById('ca-audit-id').textContent = data.id || '';
+  document.getElementById('ca-audit-user').textContent = S.displayName || S.username || '';
+  document.getElementById('ca-audit-time').textContent = data.created_at || '';
+  var fileInfo = (data.files && data.files[0]) ? (CA_FILE ? CA_FILE.name : '合同台账') : '';
+  document.getElementById('ca-audit-file').textContent = fileInfo;
+
+  document.getElementById('ca-s2-btn').disabled = false;
+  S.ca_currentFilter = '';
+  S.ca_currentPage = 1;
+  caLoadRows();
+}
+
+async function caLoadRows() {
+  if (!S.ca_currentJobId) return;
+  var params = new URLSearchParams();
+  params.set('page', S.ca_currentPage);
+  params.set('page_size', S.ca_pageSize);
+  if (S.ca_currentFilter) {
+    S.ca_currentFilter.split(',').forEach(function(c) { params.append('category', c); });
+  }
+  var q = document.getElementById('ca-search-input').value.trim();
+  if (q) params.set('keyword', q);
+  try {
+    var resp = await api('GET', '/api/jobs/' + S.ca_currentJobId + '/rows?' + params);
+    var res = await resp.json();
+    S.ca_totalRows = res.total;
+    document.getElementById('ca-row-count').textContent = res.total;
+    var totalPages = Math.max(1, Math.ceil(res.total / S.ca_pageSize));
+    document.getElementById('ca-page-info').textContent = S.ca_currentPage + ' / ' + totalPages;
+    document.getElementById('ca-btn-prev').disabled = S.ca_currentPage <= 1;
+    document.getElementById('ca-btn-next').disabled = S.ca_currentPage >= totalPages;
+    caRenderTable(res.items || []);
+  } catch(e) {
+    document.getElementById('ca-detail-body').innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--red)">加载失败</td></tr>';
+  }
+}
+
+function caRenderTable(rows) {
+  var tbody = document.getElementById('ca-detail-body');
+  if (!rows.length) {
+    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--ink3)">无记录</td></tr>';
+    return;
+  }
+  var offset = (S.ca_currentPage - 1) * S.ca_pageSize;
+  var html = '';
+  rows.forEach(function(r, i) {
+    var p = r.payload ? (typeof r.payload === 'string' ? JSON.parse(r.payload) : r.payload) : r;
+    var cls = CA_ROW_CLS[p.category] || '';
+    var daysText = p.days_remaining != null ? p.days_remaining : '—';
+    var labelText = CA_CATEGORY_LABELS[p.category] || p.category;
+    html += '<tr class="' + cls + '">' +
+      '<td>' + (offset + i + 1) + '</td>' +
+      '<td>' + esc(p.match_key || '') + '</td>' +
+      '<td>' + esc(p.name || '') + '</td>' +
+      '<td>' + esc(p.dept || '') + '</td>' +
+      '<td>' + esc(p.contract_type || '') + '</td>' +
+      '<td>' + esc(p.start_date || '') + '</td>' +
+      '<td>' + esc(p.end_date || '') + '</td>' +
+      '<td class="num">' + esc(daysText) + '</td>' +
+      '<td><span class="chip ' + (p.category === 'normal' ? 'ok' : (p.category === 'expired' || p.category === 'within_30' ? 'alert' : 'warn')) + '">' + esc(labelText) + '</span></td>' +
+      '</tr>';
+  });
+  tbody.innerHTML = html;
+}
+
+function caSetFilter(btn, filter) {
+  S.ca_currentFilter = filter;
+  S.ca_currentPage = 1;
+  document.querySelectorAll('#ca-step2 .pill').forEach(function(p) { p.classList.remove('active'); });
+  btn.classList.add('active');
+  caLoadRows();
+}
+
+function caOnSearch() {
+  clearTimeout(S.ca_searchTimer);
+  S.ca_searchTimer = setTimeout(function() {
+    S.ca_currentPage = 1;
+    caLoadRows();
+  }, 300);
+}
+
+function caChangePage(delta) {
+  S.ca_currentPage += delta;
+  caLoadRows();
+}
+
+async function caExport() {
+  if (!S.ca_currentJobId) return;
+  try {
+    var res = await fetch('/api/jobs/' + S.ca_currentJobId + '/export', {
+      headers: { Authorization: 'Bearer ' + S.token }
+    });
+    if (!res.ok) throw new Error('导出失败');
+    var blob = await res.blob();
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    var cd = res.headers.get('content-disposition') || '';
+    var fn = parseDownloadFilename(cd, '合同到期预警.xlsx');
+    a.download = fn;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  } catch(e) {
+    alert('导出失败：' + e.message);
+  }
+}
+
+async function caLoadHistory() {
+  try {
+    var resp = await api('GET', '/api/jobs?module=contract_alert');
+    var res = await resp.json();
+    var jobs = res.items || [];
+    var tbody = document.getElementById('ca-history-body');
+    if (!jobs.length) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--ink3)">暂无记录</td></tr>';
+      return;
+    }
+    var html = '';
+    jobs.forEach(function(j) {
+      var s = j.summary || {};
+      var warn = (s.expired||0)+(s.within_30||0)+(s.within_60||0)+(s.within_90||0);
+      var total = warn + (s.normal||0);
+      var summary = '过期' + (s.expired||0) + ' / 30天' + (s.within_30||0) + ' / 60天' + (s.within_60||0) + ' / 90天' + (s.within_90||0);
+      html += '<tr>' +
+        '<td>' + esc(j.created_at || '') + '</td>' +
+        '<td><span class="chip ok">' + esc(j.status || '') + '</span></td>' +
+        '<td>' + esc(j.created_by || '') + '</td>' +
+        '<td class="num">' + total + '</td>' +
+        '<td>' + esc(summary) + '</td>' +
+        '<td><button class="btn sm" onclick="caViewJob(\'' + j.id + '\')">查看</button></td>' +
+        '</tr>';
+    });
+    tbody.innerHTML = html;
+  } catch(e) {
+    document.getElementById('ca-history-body').innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--red)">加载失败</td></tr>';
+  }
+}
+
+async function caViewJob(jobId) {
+  S.ca_currentJobId = jobId;
+  try {
+    var resp = await api('GET', '/api/jobs/' + jobId);
+    var res = await resp.json();
+    caRenderResult(res);
+    caGoStep(2);
+  } catch(e) {
+    alert('加载失败：' + e.message);
+  }
+}
+
+// ===================== 花名册校验 =====================
+var RC_FILE = null;
+
+var RC_CATEGORY_LABELS = {
+  clean: '正常', missing_field: '缺失必填项', duplicate: '重复', contradiction: '矛盾'
+};
+var RC_ROW_CLS = {
+  clean: 'row-ok', missing_field: 'row-alert', duplicate: 'row-alert', contradiction: 'row-warn'
+};
+
+function rcGoStep(n) {
+  [1,2,3].forEach(function(i) {
+    document.getElementById('rc-step' + i).classList.toggle('hidden', i !== n);
+    var btn = document.getElementById('rc-s' + i + '-btn');
+    btn.classList.toggle('active', i === n);
+    if (i === 2) btn.disabled = !S.rc_currentJobId;
+  });
+  if (n === 3) rcLoadHistory();
+}
+
+function rcHandleFile(input) {
+  if (input.files && input.files[0]) {
+    RC_FILE = input.files[0];
+    var nameEl = document.getElementById('dz-roster-name');
+    nameEl.textContent = RC_FILE.name;
+    nameEl.classList.remove('hidden');
+    document.getElementById('dz-roster').classList.add('chosen');
+    document.getElementById('rc-run-btn').disabled = false;
+  }
+}
+
+function rcHandleDrop(e) {
+  e.preventDefault();
+  e.currentTarget.classList.remove('drag');
+  var file = e.dataTransfer.files[0];
+  if (file) {
+    RC_FILE = file;
+    document.getElementById('f-roster').files = e.dataTransfer.files;
+    var nameEl = document.getElementById('dz-roster-name');
+    nameEl.textContent = RC_FILE.name;
+    nameEl.classList.remove('hidden');
+    document.getElementById('dz-roster').classList.add('chosen');
+    document.getElementById('rc-run-btn').disabled = false;
+  }
+}
+
+function rcResetFile() {
+  RC_FILE = null;
+  document.getElementById('f-roster').value = '';
+  document.getElementById('dz-roster-name').classList.add('hidden');
+  document.getElementById('dz-roster').classList.remove('chosen');
+  document.getElementById('rc-run-btn').disabled = true;
+}
+
+async function rcRun() {
+  if (!RC_FILE) return;
+  var btn = document.getElementById('rc-run-btn');
+  btn.disabled = true;
+  btn.textContent = '校验中…';
+  try {
+    var fd = new FormData();
+    fd.append('roster_file', RC_FILE);
+    var res = await fetch('/api/roster-check/jobs', {
+      method: 'POST',
+      headers: { Authorization: 'Bearer ' + S.token },
+      body: fd
+    });
+    var data = await res.json();
+    if (!res.ok) throw new Error(data.detail || data.error || '校验失败');
+    S.rc_currentJobId = data.id;
+    rcRenderResult(data);
+    rcGoStep(2);
+  } catch(e) {
+    alert('校验失败：' + e.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '开始校验';
+  }
+}
+
+function rcRenderResult(data) {
+  var s = data.summary || {};
+  document.getElementById('rc-stat-total').textContent = s.total || 0;
+  document.getElementById('rc-stat-missing').textContent = s.missing_field || 0;
+  document.getElementById('rc-stat-dup').textContent = s.duplicate || 0;
+  document.getElementById('rc-stat-contra').textContent = s.contradiction || 0;
+  document.getElementById('rc-stat-clean').textContent = s.clean || 0;
+
+  var issues = (s.missing_field||0) + (s.duplicate||0) + (s.contradiction||0);
+  document.getElementById('rc-res-sub').textContent = '共 ' + (s.total||0) + ' 名员工，' + issues + ' 项问题';
+
+  var sha = (data.files && data.files[0]) || {};
+  document.getElementById('rc-readonly-text').innerHTML =
+    '花名册全程只读，SHA-256 校验：' + (sha.sha256_before||'').substring(0,12) + '…' +
+    (sha.readonly_verified ? ' <b style="color:var(--green)">✓ 未修改</b>' : ' <b style="color:var(--red)">⚠ 文件变化</b>');
+
+  document.getElementById('rc-audit-id').textContent = data.id || '';
+  document.getElementById('rc-audit-user').textContent = S.displayName || S.username || '';
+  document.getElementById('rc-audit-time').textContent = data.created_at || '';
+  document.getElementById('rc-audit-file').textContent = RC_FILE ? RC_FILE.name : '花名册';
+
+  document.getElementById('rc-s2-btn').disabled = false;
+  S.rc_currentFilter = '';
+  S.rc_currentPage = 1;
+  rcLoadRows();
+}
+
+async function rcLoadRows() {
+  if (!S.rc_currentJobId) return;
+  var params = new URLSearchParams();
+  params.set('page', S.rc_currentPage);
+  params.set('page_size', S.rc_pageSize);
+  if (S.rc_currentFilter) {
+    S.rc_currentFilter.split(',').forEach(function(c) { params.append('category', c); });
+  }
+  var q = document.getElementById('rc-search-input').value.trim();
+  if (q) params.set('keyword', q);
+  try {
+    var resp = await api('GET', '/api/jobs/' + S.rc_currentJobId + '/rows?' + params);
+    var res = await resp.json();
+    S.rc_totalRows = res.total;
+    document.getElementById('rc-row-count').textContent = res.total;
+    var totalPages = Math.max(1, Math.ceil(res.total / S.rc_pageSize));
+    document.getElementById('rc-page-info').textContent = S.rc_currentPage + ' / ' + totalPages;
+    document.getElementById('rc-btn-prev').disabled = S.rc_currentPage <= 1;
+    document.getElementById('rc-btn-next').disabled = S.rc_currentPage >= totalPages;
+    rcRenderTable(res.items || []);
+  } catch(e) {
+    document.getElementById('rc-detail-body').innerHTML = '<tr><td colspan="10" style="text-align:center;color:var(--red)">加载失败</td></tr>';
+  }
+}
+
+function rcRenderTable(rows) {
+  var tbody = document.getElementById('rc-detail-body');
+  if (!rows.length) {
+    tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;color:var(--ink3)">无记录</td></tr>';
+    return;
+  }
+  var offset = (S.rc_currentPage - 1) * S.rc_pageSize;
+  var html = '';
+  rows.forEach(function(r, i) {
+    var cls = RC_ROW_CLS[r.category] || '';
+    var labelText = RC_CATEGORY_LABELS[r.category] || r.category;
+    html += '<tr class="' + cls + '">' +
+      '<td>' + (offset + i + 1) + '</td>' +
+      '<td>' + esc(r.match_key || '') + '</td>' +
+      '<td>' + esc(r.name || '') + '</td>' +
+      '<td>' + esc(r.gender || '') + '</td>' +
+      '<td>' + esc(r.birth_date || '') + '</td>' +
+      '<td>' + esc(r.id_number_masked || '') + '</td>' +
+      '<td>' + esc(r.dept || '') + '</td>' +
+      '<td>' + esc(r.hire_date || '') + '</td>' +
+      '<td><span class="chip ' + (r.category === 'clean' ? 'ok' : (r.category === 'missing_field' || r.category === 'duplicate' ? 'alert' : 'warn')) + '">' + esc(labelText) + '</span></td>' +
+      '<td>' + esc(r.issue_summary || '') + '</td>' +
+      '</tr>';
+  });
+  tbody.innerHTML = html;
+}
+
+function rcSetFilter(btn, filter) {
+  S.rc_currentFilter = filter;
+  S.rc_currentPage = 1;
+  document.querySelectorAll('#rc-step2 .pill').forEach(function(p) { p.classList.remove('active'); });
+  btn.classList.add('active');
+  rcLoadRows();
+}
+
+function rcOnSearch() {
+  clearTimeout(S.rc_searchTimer);
+  S.rc_searchTimer = setTimeout(function() {
+    S.rc_currentPage = 1;
+    rcLoadRows();
+  }, 300);
+}
+
+function rcChangePage(delta) {
+  S.rc_currentPage += delta;
+  rcLoadRows();
+}
+
+async function rcExport() {
+  if (!S.rc_currentJobId) return;
+  try {
+    var res = await fetch('/api/jobs/' + S.rc_currentJobId + '/export', {
+      headers: { Authorization: 'Bearer ' + S.token }
+    });
+    if (!res.ok) throw new Error('导出失败');
+    var blob = await res.blob();
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    var cd = res.headers.get('content-disposition') || '';
+    var fn = parseDownloadFilename(cd, '花名册校验.xlsx');
+    a.download = fn;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  } catch(e) {
+    alert('导出失败：' + e.message);
+  }
+}
+
+async function rcLoadHistory() {
+  try {
+    var resp = await api('GET', '/api/jobs?module=roster_check');
+    var res = await resp.json();
+    var jobs = res.items || [];
+    var tbody = document.getElementById('rc-history-body');
+    if (!jobs.length) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--ink3)">暂无记录</td></tr>';
+      return;
+    }
+    var html = '';
+    jobs.forEach(function(j) {
+      var s = j.summary || {};
+      var issues = (s.missing_field||0) + (s.duplicate||0) + (s.contradiction||0);
+      var summary = '缺失' + (s.missing_field||0) + ' / 重复' + (s.duplicate||0) + ' / 矛盾' + (s.contradiction||0);
+      html += '<tr>' +
+        '<td>' + esc(j.created_at || '') + '</td>' +
+        '<td><span class="chip ok">' + esc(j.status || '') + '</span></td>' +
+        '<td>' + esc(j.created_by || '') + '</td>' +
+        '<td class="num">' + (s.total||0) + '</td>' +
+        '<td>' + esc(summary) + '</td>' +
+        '<td><button class="btn sm" onclick="rcViewJob(\'' + j.id + '\')">查看</button></td>' +
+        '</tr>';
+    });
+    tbody.innerHTML = html;
+  } catch(e) {
+    document.getElementById('rc-history-body').innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--red)">加载失败</td></tr>';
+  }
+}
+
+async function rcViewJob(jobId) {
+  S.rc_currentJobId = jobId;
+  try {
+    var resp = await api('GET', '/api/jobs/' + jobId);
+    var res = await resp.json();
+    rcRenderResult(res);
+    rcGoStep(2);
+  } catch(e) {
+    alert('加载失败：' + e.message);
+  }
+}
+
+// ===================== 考勤统计 =====================
+var AT_FILE = null;
+
+var AT_CATEGORY_LABELS = {
+  normal: '正常', late: '迟到', early: '早退',
+  missing_punch: '缺卡', overtime: '加班', has_issue: '有异常'
+};
+var AT_ROW_CLS = {
+  normal: 'row-ok', late: 'row-alert', early: 'row-alert',
+  missing_punch: 'row-warn', overtime: 'row-ok', has_issue: 'row-warn'
+};
+
+function atGoStep(n) {
+  [1,2,3].forEach(function(i) {
+    document.getElementById('at-step' + i).classList.toggle('hidden', i !== n);
+    var btn = document.getElementById('at-s' + i + '-btn');
+    btn.classList.toggle('active', i === n);
+    if (i === 2) btn.disabled = !S.at_currentJobId;
+  });
+  if (n === 3) atLoadHistory();
+}
+
+function atHandleFile(input) {
+  if (input.files && input.files[0]) {
+    AT_FILE = input.files[0];
+    var nameEl = document.getElementById('dz-attendance-name');
+    nameEl.textContent = AT_FILE.name;
+    nameEl.classList.remove('hidden');
+    document.getElementById('dz-attendance').classList.add('chosen');
+    document.getElementById('at-run-btn').disabled = false;
+  }
+}
+
+function atHandleDrop(e) {
+  e.preventDefault();
+  e.currentTarget.classList.remove('drag');
+  var file = e.dataTransfer.files[0];
+  if (file) {
+    AT_FILE = file;
+    document.getElementById('f-attendance').files = e.dataTransfer.files;
+    var nameEl = document.getElementById('dz-attendance-name');
+    nameEl.textContent = AT_FILE.name;
+    nameEl.classList.remove('hidden');
+    document.getElementById('dz-attendance').classList.add('chosen');
+    document.getElementById('at-run-btn').disabled = false;
+  }
+}
+
+function atResetFile() {
+  AT_FILE = null;
+  document.getElementById('f-attendance').value = '';
+  document.getElementById('dz-attendance-name').classList.add('hidden');
+  document.getElementById('dz-attendance').classList.remove('chosen');
+  document.getElementById('at-run-btn').disabled = true;
+}
+
+async function atRun() {
+  if (!AT_FILE) return;
+  var btn = document.getElementById('at-run-btn');
+  btn.disabled = true;
+  btn.textContent = '分析中…';
+  try {
+    var fd = new FormData();
+    fd.append('attendance_file', AT_FILE);
+    fd.append('shift_start', document.getElementById('at-shift-start').value);
+    fd.append('shift_end', document.getElementById('at-shift-end').value);
+    fd.append('ot_threshold_min', document.getElementById('at-ot-threshold').value);
+    var res = await fetch('/api/attendance/jobs', {
+      method: 'POST',
+      headers: { Authorization: 'Bearer ' + S.token },
+      body: fd
+    });
+    var data = await res.json();
+    if (!res.ok) throw new Error(data.detail || data.error || '分析失败');
+    S.at_currentJobId = data.id;
+    atRenderResult(data);
+    atGoStep(2);
+  } catch(e) {
+    alert('分析失败：' + e.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '开始分析';
+  }
+}
+
+function atRenderResult(data) {
+  var s = data.summary || {};
+  document.getElementById('at-stat-persons').textContent = s.total_persons || 0;
+  document.getElementById('at-stat-late').textContent = s.late || 0;
+  document.getElementById('at-stat-early').textContent = s.early || 0;
+  document.getElementById('at-stat-missing').textContent = s.missing_punch || 0;
+  document.getElementById('at-stat-ot').textContent = s.overtime || 0;
+
+  document.getElementById('at-res-sub').textContent =
+    '共 ' + (s.total_persons||0) + ' 人、' + (s.total_records||0) + ' 条打卡记录，班次 ' +
+    (s.shift_start||'08:30') + '~' + (s.shift_end||'17:30') + '，加班阈值 ' + (s.ot_threshold_min||30) + ' 分钟';
+
+  var sha = (data.files && data.files[0]) || {};
+  document.getElementById('at-readonly-text').innerHTML =
+    '打卡明细全程只读，SHA-256 校验：' + (sha.sha256_before||'').substring(0,12) + '…' +
+    (sha.readonly_verified ? ' <b style="color:var(--green)">✓ 未修改</b>' : ' <b style="color:var(--red)">⚠ 文件变化</b>');
+
+  document.getElementById('at-audit-id').textContent = data.id || '';
+  document.getElementById('at-audit-user').textContent = S.displayName || S.username || '';
+  document.getElementById('at-audit-time').textContent = data.created_at || '';
+  document.getElementById('at-audit-shift').textContent =
+    (s.shift_start||'08:30') + ' ~ ' + (s.shift_end||'17:30') + '，加班阈值 ' + (s.ot_threshold_min||30) + ' 分钟';
+
+  document.getElementById('at-s2-btn').disabled = false;
+  S.at_currentFilter = '';
+  S.at_currentPage = 1;
+  S.at_viewMode = 'summary';
+  document.getElementById('at-tab-summary').classList.add('active');
+  document.getElementById('at-tab-detail').classList.remove('active');
+  atLoadRows();
+}
+
+function atSwitchView(mode) {
+  S.at_viewMode = mode;
+  S.at_currentPage = 1;
+  document.getElementById('at-tab-summary').classList.toggle('active', mode === 'summary');
+  document.getElementById('at-tab-detail').classList.toggle('active', mode === 'detail');
+  atLoadRows();
+}
+
+async function atLoadRows() {
+  if (!S.at_currentJobId) return;
+  var params = new URLSearchParams();
+  params.set('page', 1);
+  params.set('page_size', 9999);
+  try {
+    var resp = await api('GET', '/api/jobs/' + S.at_currentJobId + '/rows?' + params);
+    var res = await resp.json();
+    var allItems = res.items || [];
+
+    // 前端按 view mode 过滤
+    var filtered;
+    if (S.at_viewMode === 'summary') {
+      filtered = allItems.filter(function(r) { return r.row_type === 'person_summary'; });
+    } else {
+      filtered = allItems.filter(function(r) { return r.row_type === 'detail'; });
+    }
+
+    // category 筛选
+    if (S.at_currentFilter) {
+      var cats = S.at_currentFilter.split(',');
+      filtered = filtered.filter(function(r) { return cats.indexOf(r.category) >= 0; });
+    }
+
+    // keyword 筛选
+    var q = document.getElementById('at-search-input').value.trim().toLowerCase();
+    if (q) {
+      filtered = filtered.filter(function(r) {
+        return (r.match_key || '').toLowerCase().indexOf(q) >= 0 ||
+               (r.name || '').toLowerCase().indexOf(q) >= 0;
+      });
+    }
+
+    S.at_totalRows = filtered.length;
+    document.getElementById('at-row-count').textContent = filtered.length;
+    var totalPages = Math.max(1, Math.ceil(filtered.length / S.at_pageSize));
+    if (S.at_currentPage > totalPages) S.at_currentPage = totalPages;
+    document.getElementById('at-page-info').textContent = S.at_currentPage + ' / ' + totalPages;
+    document.getElementById('at-btn-prev').disabled = S.at_currentPage <= 1;
+    document.getElementById('at-btn-next').disabled = S.at_currentPage >= totalPages;
+
+    var offset = (S.at_currentPage - 1) * S.at_pageSize;
+    var pageItems = filtered.slice(offset, offset + S.at_pageSize);
+
+    if (S.at_viewMode === 'summary') {
+      atRenderSummaryTable(pageItems, offset);
+    } else {
+      atRenderDetailTable(pageItems, offset);
+    }
+  } catch(e) {
+    document.getElementById('at-detail-body').innerHTML = '<tr><td colspan="10" style="text-align:center;color:var(--red)">加载失败</td></tr>';
+  }
+}
+
+function atRenderSummaryTable(rows, offset) {
+  document.getElementById('at-thead').innerHTML =
+    '<tr><th>#</th><th>工号</th><th>姓名</th><th>部门</th><th class="num">出勤天数</th>' +
+    '<th class="num">迟到</th><th class="num">早退</th><th class="num">缺卡</th><th class="num">加班(h)</th><th>状态</th></tr>';
+  var tbody = document.getElementById('at-detail-body');
+  if (!rows.length) {
+    tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;color:var(--ink3)">无记录</td></tr>';
+    return;
+  }
+  var html = '';
+  rows.forEach(function(r, i) {
+    var cls = AT_ROW_CLS[r.category] || '';
+    html += '<tr class="' + cls + '">' +
+      '<td>' + (offset + i + 1) + '</td>' +
+      '<td>' + esc(r.match_key || '') + '</td>' +
+      '<td>' + esc(r.name || '') + '</td>' +
+      '<td>' + esc(r.dept || '') + '</td>' +
+      '<td class="num">' + (r.days || 0) + '</td>' +
+      '<td class="num">' + (r.late_count || 0) + '</td>' +
+      '<td class="num">' + (r.early_count || 0) + '</td>' +
+      '<td class="num">' + (r.missing_count || 0) + '</td>' +
+      '<td class="num">' + (r.ot_hours || 0) + '</td>' +
+      '<td><span class="chip ' + (r.category === 'normal' ? 'ok' : 'warn') + '">' + esc(AT_CATEGORY_LABELS[r.category] || r.category) + '</span></td>' +
+      '</tr>';
+  });
+  tbody.innerHTML = html;
+}
+
+function atRenderDetailTable(rows, offset) {
+  document.getElementById('at-thead').innerHTML =
+    '<tr><th>#</th><th>日期</th><th>工号</th><th>姓名</th><th>部门</th>' +
+    '<th>上班打卡</th><th>下班打卡</th><th class="num">迟到(分)</th><th class="num">早退(分)</th><th>状态</th></tr>';
+  var tbody = document.getElementById('at-detail-body');
+  if (!rows.length) {
+    tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;color:var(--ink3)">无记录</td></tr>';
+    return;
+  }
+  var html = '';
+  rows.forEach(function(r, i) {
+    var cls = AT_ROW_CLS[r.category] || '';
+    var lateTxt = r.is_late ? r.late_min : '';
+    var earlyTxt = r.is_early ? r.early_min : '';
+    html += '<tr class="' + cls + '">' +
+      '<td>' + (offset + i + 1) + '</td>' +
+      '<td>' + esc(r.att_date || '') + '</td>' +
+      '<td>' + esc(r.match_key || '') + '</td>' +
+      '<td>' + esc(r.name || '') + '</td>' +
+      '<td>' + esc(r.dept || '') + '</td>' +
+      '<td>' + esc(r.clock_in || '—') + '</td>' +
+      '<td>' + esc(r.clock_out || '—') + '</td>' +
+      '<td class="num">' + esc(lateTxt) + '</td>' +
+      '<td class="num">' + esc(earlyTxt) + '</td>' +
+      '<td><span class="chip ' + (r.category === 'normal' ? 'ok' : (r.category === 'overtime' ? 'ok' : 'alert')) + '">' + esc(AT_CATEGORY_LABELS[r.category] || r.category) + '</span></td>' +
+      '</tr>';
+  });
+  tbody.innerHTML = html;
+}
+
+function atSetFilter(btn, filter) {
+  S.at_currentFilter = filter;
+  S.at_currentPage = 1;
+  document.querySelectorAll('#at-step2 .filter-bar .pill:not(#at-tab-summary):not(#at-tab-detail)').forEach(function(p) { p.classList.remove('active'); });
+  btn.classList.add('active');
+  atLoadRows();
+}
+
+function atOnSearch() {
+  clearTimeout(S.at_searchTimer);
+  S.at_searchTimer = setTimeout(function() {
+    S.at_currentPage = 1;
+    atLoadRows();
+  }, 300);
+}
+
+function atChangePage(delta) {
+  S.at_currentPage += delta;
+  atLoadRows();
+}
+
+async function atExport() {
+  if (!S.at_currentJobId) return;
+  try {
+    var res = await fetch('/api/jobs/' + S.at_currentJobId + '/export', {
+      headers: { Authorization: 'Bearer ' + S.token }
+    });
+    if (!res.ok) throw new Error('导出失败');
+    var blob = await res.blob();
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    var cd = res.headers.get('content-disposition') || '';
+    var fn = parseDownloadFilename(cd, '考勤统计.xlsx');
+    a.download = fn;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  } catch(e) {
+    alert('导出失败：' + e.message);
+  }
+}
+
+async function atLoadHistory() {
+  try {
+    var resp = await api('GET', '/api/jobs?module=attendance');
+    var res = await resp.json();
+    var jobs = res.items || [];
+    var tbody = document.getElementById('at-history-body');
+    if (!jobs.length) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--ink3)">暂无记录</td></tr>';
+      return;
+    }
+    var html = '';
+    jobs.forEach(function(j) {
+      var s = j.summary || {};
+      var summary = '迟到' + (s.late||0) + ' / 早退' + (s.early||0) + ' / 缺卡' + (s.missing_punch||0) + ' / 加班' + (s.overtime||0);
+      html += '<tr>' +
+        '<td>' + esc(j.created_at || '') + '</td>' +
+        '<td><span class="chip ok">' + esc(j.status || '') + '</span></td>' +
+        '<td>' + esc(j.created_by || '') + '</td>' +
+        '<td class="num">' + (s.total_records||0) + '</td>' +
+        '<td>' + esc(summary) + '</td>' +
+        '<td><button class="btn sm" onclick="atViewJob(\'' + j.id + '\')">查看</button></td>' +
+        '</tr>';
+    });
+    tbody.innerHTML = html;
+  } catch(e) {
+    document.getElementById('at-history-body').innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--red)">加载失败</td></tr>';
+  }
+}
+
+async function atViewJob(jobId) {
+  S.at_currentJobId = jobId;
+  try {
+    var resp = await api('GET', '/api/jobs/' + jobId);
+    var res = await resp.json();
+    atRenderResult(res);
+    atGoStep(2);
+  } catch(e) {
+    alert('加载失败：' + e.message);
+  }
+}
+
+// ===================== 社保公积金核对 =====================
+var SI_FILES = { payroll: null, social: null };
+
+var SI_CATEGORY_LABELS = {
+  match: '一致', base_diff: '基数差异', amount_diff: '金额差异',
+  payroll_only: '工资表有·社保无', social_only: '社保有·工资表无'
+};
+var SI_ROW_CLS = {
+  match: 'row-ok', base_diff: 'row-alert', amount_diff: 'row-alert',
+  payroll_only: 'row-warn', social_only: 'row-warn'
+};
+
+function siGoStep(n) {
+  [1,2,3].forEach(function(i) {
+    document.getElementById('si-step' + i).classList.toggle('hidden', i !== n);
+    var btn = document.getElementById('si-s' + i + '-btn');
+    btn.classList.toggle('active', i === n);
+    if (i === 2) btn.disabled = !S.si_currentJobId;
+  });
+  if (n === 3) siLoadHistory();
+}
+
+function siHandleFile(input, side) {
+  if (input.files && input.files[0]) {
+    SI_FILES[side] = input.files[0];
+    var nameEl = document.getElementById('dz-si-' + side + '-name');
+    nameEl.textContent = SI_FILES[side].name;
+    nameEl.classList.remove('hidden');
+    document.getElementById('dz-si-' + side).classList.add('ready');
+    siUpdateRunBtn();
+  }
+}
+
+function siHandleDrop(e, side) {
+  e.preventDefault();
+  e.currentTarget.classList.remove('drag');
+  var file = e.dataTransfer.files[0];
+  if (file) {
+    SI_FILES[side] = file;
+    var nameEl = document.getElementById('dz-si-' + side + '-name');
+    nameEl.textContent = file.name;
+    nameEl.classList.remove('hidden');
+    document.getElementById('dz-si-' + side).classList.add('ready');
+    siUpdateRunBtn();
+  }
+}
+
+function siUpdateRunBtn() {
+  document.getElementById('si-run-btn').disabled = !(SI_FILES.payroll && SI_FILES.social);
+}
+
+function siResetFiles() {
+  ['payroll','social'].forEach(function(s) {
+    SI_FILES[s] = null;
+    document.getElementById('dz-si-' + s).classList.remove('ready','drag');
+    document.getElementById('dz-si-' + s + '-name').classList.add('hidden');
+    document.getElementById('f-si-' + s).value = '';
+  });
+  siUpdateRunBtn();
+}
+
+async function siRun() {
+  if (!SI_FILES.payroll || !SI_FILES.social) return;
+  showOverlay('正在核对社保数据…');
+  try {
+    var fd = new FormData();
+    fd.append('payroll_file', SI_FILES.payroll);
+    fd.append('social_file', SI_FILES.social);
+    var res = await api('POST', '/api/social-ins/jobs', fd, true);
+    var data = await res.json();
+    if (!res.ok) { showToast(data.message || '核对失败', 'error'); return; }
+    S.si_currentJobId = data.id;
+    siRenderResult(data);
+    siGoStep(2);
+    showToast('核对完成', 'success');
+  } catch(e) {
+    showToast('核对失败：' + e.message, 'error');
+  } finally {
+    hideOverlay();
+  }
+}
+
+function siRenderResult(data) {
+  var s = data.summary || {};
+  document.getElementById('si-stat-match').textContent = s.match || 0;
+  document.getElementById('si-stat-base').textContent = s.base_diff || 0;
+  document.getElementById('si-stat-amount').textContent = s.amount_diff || 0;
+  document.getElementById('si-stat-ponly').textContent = s.payroll_only || 0;
+  document.getElementById('si-stat-sonly').textContent = s.social_only || 0;
+
+  var total = (s.match||0) + (s.base_diff||0) + (s.amount_diff||0) + (s.payroll_only||0) + (s.social_only||0);
+  var issues = (s.base_diff||0) + (s.amount_diff||0) + (s.payroll_only||0) + (s.social_only||0);
+  document.getElementById('si-res-sub').textContent = '共 ' + total + ' 人，' + issues + ' 项差异';
+
+  var files = data.files || [];
+  var verified = files.every(function(f) { return f.readonly_verified; });
+  document.getElementById('si-readonly-text').innerHTML = verified
+    ? '工资表和社保申报表全程只读，SHA-256 校验一致。<b>本次核对未修改任何原始文件。</b>'
+    : '工资表和社保申报表全程只读，SHA-256 校验。<b style="color:var(--alert)">校验异常，请检查文件。</b>';
+
+  document.getElementById('si-audit-id').textContent = data.id || '';
+  document.getElementById('si-audit-user').textContent = S.displayName || S.username || '';
+  document.getElementById('si-audit-time').textContent = data.created_at || '';
+  var pf = files.find(function(f) { return f.side === 'payroll'; });
+  var sf = files.find(function(f) { return f.side === 'social'; });
+  document.getElementById('si-audit-pfile').textContent = pf ? pf.original_name : '—';
+  document.getElementById('si-audit-sfile').textContent = sf ? sf.original_name : '—';
+
+  document.getElementById('si-s2-btn').disabled = false;
+  S.si_currentFilter = '';
+  S.si_currentPage = 1;
+  siLoadRows();
+}
+
+async function siLoadRows() {
+  if (!S.si_currentJobId) return;
+  var params = new URLSearchParams();
+  params.set('page', S.si_currentPage);
+  params.set('page_size', S.si_pageSize);
+  if (S.si_currentFilter) {
+    S.si_currentFilter.split(',').forEach(function(c) { params.append('category', c); });
+  }
+  var q = document.getElementById('si-search-input').value.trim();
+  if (q) params.set('keyword', q);
+  try {
+    var resp = await api('GET', '/api/jobs/' + S.si_currentJobId + '/rows?' + params);
+    var res = await resp.json();
+    S.si_totalRows = res.total;
+    document.getElementById('si-row-count').textContent = res.total;
+    var totalPages = Math.max(1, Math.ceil(res.total / S.si_pageSize));
+    document.getElementById('si-page-info').textContent = S.si_currentPage + ' / ' + totalPages;
+    document.getElementById('si-btn-prev').disabled = S.si_currentPage <= 1;
+    document.getElementById('si-btn-next').disabled = S.si_currentPage >= totalPages;
+    siRenderTable(res.items || []);
+  } catch(e) {
+    document.getElementById('si-detail-body').innerHTML = '<tr><td colspan="24" style="text-align:center;color:var(--red)">加载失败</td></tr>';
+  }
+}
+
+function siRenderTable(rows) {
+  var tbody = document.getElementById('si-detail-body');
+  if (!rows.length) {
+    tbody.innerHTML = '<tr><td colspan="24" style="text-align:center;color:var(--ink3)">暂无匹配数据</td></tr>';
+    return;
+  }
+  var offset = (S.si_currentPage - 1) * S.si_pageSize;
+  var html = '';
+  rows.forEach(function(r, i) {
+    var cls = SI_ROW_CLS[r.category] || '';
+    var label = SI_CATEGORY_LABELS[r.category] || r.category;
+    var tagCls = r.category === 'match' ? 'tag-ok' : (r.category === 'base_diff' || r.category === 'amount_diff' ? 'tag-alert' : 'tag-warn');
+    var diffFields = (r.diff_fields || []).join('、');
+
+    function val(v) { return v != null ? esc(v) : '<span style="color:var(--ink3)">—</span>'; }
+    function delta(v) {
+      if (!v) return '';
+      var n = parseFloat(v);
+      var style = n > 0 ? 'color:var(--warn)' : 'color:var(--alert)';
+      return '<span style="' + style + '">' + esc(v) + '</span>';
+    }
+
+    html += '<tr class="' + cls + '">' +
+      '<td class="num" style="color:var(--ink3)">' + (offset + i + 1) + '</td>' +
+      '<td><code style="font-family:monospace;font-size:12px">' + esc(r.match_key || '') + '</code></td>' +
+      '<td>' + esc(r.name || '') + '</td>' +
+      '<td style="color:var(--ink2)">' + esc(r.dept || '') + '</td>' +
+      '<td><span class="row-tag ' + tagCls + '">' + label + '</span></td>' +
+      '<td class="num">' + val(r.payroll_si_base) + '</td>' +
+      '<td class="num">' + val(r.social_si_base) + '</td>' +
+      '<td class="num">' + delta(r.si_base_delta) + '</td>' +
+      '<td class="num">' + val(r.payroll_hf_base) + '</td>' +
+      '<td class="num">' + val(r.social_hf_base) + '</td>' +
+      '<td class="num">' + delta(r.hf_base_delta) + '</td>' +
+      '<td class="num">' + val(r.payroll_si_person) + '</td>' +
+      '<td class="num">' + val(r.social_si_person) + '</td>' +
+      '<td class="num">' + delta(r.si_person_delta) + '</td>' +
+      '<td class="num">' + val(r.payroll_si_company) + '</td>' +
+      '<td class="num">' + val(r.social_si_company) + '</td>' +
+      '<td class="num">' + delta(r.si_company_delta) + '</td>' +
+      '<td class="num">' + val(r.payroll_hf_person) + '</td>' +
+      '<td class="num">' + val(r.social_hf_person) + '</td>' +
+      '<td class="num">' + delta(r.hf_person_delta) + '</td>' +
+      '<td class="num">' + val(r.payroll_hf_company) + '</td>' +
+      '<td class="num">' + val(r.social_hf_company) + '</td>' +
+      '<td class="num">' + delta(r.hf_company_delta) + '</td>' +
+      '<td style="font-size:12px;color:var(--ink2)">' + esc(diffFields) + '</td>' +
+      '</tr>';
+  });
+  tbody.innerHTML = html;
+}
+
+function siSetFilter(btn, filter) {
+  S.si_currentFilter = filter;
+  S.si_currentPage = 1;
+  document.querySelectorAll('#si-step2 .pill').forEach(function(p) { p.classList.remove('active'); });
+  btn.classList.add('active');
+  siLoadRows();
+}
+
+function siOnSearch() {
+  clearTimeout(S.si_searchTimer);
+  S.si_searchTimer = setTimeout(function() {
+    S.si_currentPage = 1;
+    siLoadRows();
+  }, 300);
+}
+
+function siChangePage(delta) {
+  S.si_currentPage += delta;
+  siLoadRows();
+}
+
+async function siExport() {
+  if (!S.si_currentJobId) return;
+  showOverlay('正在导出…');
+  try {
+    var res = await api('GET', '/api/jobs/' + S.si_currentJobId + '/export');
+    if (!res.ok) { showToast('导出失败', 'error'); return; }
+    var blob = await res.blob();
+    var cd = res.headers.get('Content-Disposition') || '';
+    var filename = parseDownloadFilename(cd, '社保核对.xlsx');
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url; a.download = filename; a.click();
+    URL.revokeObjectURL(url);
+    showToast('导出成功', 'success');
+  } catch(e) {
+    showToast('导出失败：' + e.message, 'error');
+  } finally {
+    hideOverlay();
+  }
+}
+
+async function siLoadHistory() {
+  try {
+    var resp = await api('GET', '/api/jobs?module=social_ins');
+    var res = await resp.json();
+    var jobs = res.items || [];
+    var tbody = document.getElementById('si-history-body');
+    if (!jobs.length) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--ink3)">暂无记录</td></tr>';
+      return;
+    }
+    var html = '';
+    jobs.forEach(function(j) {
+      var s = j.summary || {};
+      var total = (s.match||0) + (s.base_diff||0) + (s.amount_diff||0) + (s.payroll_only||0) + (s.social_only||0);
+      var summary = '一致' + (s.match||0) + ' / 基数差' + (s.base_diff||0) + ' / 金额差' + (s.amount_diff||0) + ' / 单边' + ((s.payroll_only||0)+(s.social_only||0));
+      html += '<tr>' +
+        '<td>' + esc(j.created_at || '') + '</td>' +
+        '<td><span class="chip ok">done</span></td>' +
+        '<td>' + esc(j.created_by || '') + '</td>' +
+        '<td class="num">' + total + '</td>' +
+        '<td>' + esc(summary) + '</td>' +
+        '<td><button class="btn sm" onclick="siViewJob(\'' + j.id + '\')">查看</button></td>' +
+        '</tr>';
+    });
+    tbody.innerHTML = html;
+  } catch(e) {
+    document.getElementById('si-history-body').innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--red)">加载失败</td></tr>';
+  }
+}
+
+async function siViewJob(jobId) {
+  S.si_currentJobId = jobId;
+  try {
+    var resp = await api('GET', '/api/jobs/' + jobId);
+    var res = await resp.json();
+    siRenderResult(res);
+    siGoStep(2);
+  } catch(e) {
+    alert('加载失败：' + e.message);
+  }
+}
+
+// ===================== 人员成本分析 =====================
+var CA2_FILE = null;
+
+function ca2GoStep(n) {
+  [1,2,3].forEach(function(i) {
+    document.getElementById('ca2-step' + i).classList.toggle('hidden', i !== n);
+    var btn = document.getElementById('ca2-s' + i + '-btn');
+    btn.classList.toggle('active', i === n);
+    if (i === 2) btn.disabled = !S.ca2_currentJobId;
+  });
+  if (n === 3) ca2LoadHistory();
+}
+
+function ca2HandleFile(input) {
+  if (input.files && input.files[0]) {
+    CA2_FILE = input.files[0];
+    var nameEl = document.getElementById('dz-staff-name');
+    nameEl.textContent = CA2_FILE.name;
+    nameEl.classList.remove('hidden');
+    document.getElementById('dz-staff').classList.add('ready');
+    document.getElementById('ca2-run-btn').disabled = false;
+  }
+}
+
+function ca2HandleDrop(e) {
+  e.preventDefault();
+  e.currentTarget.classList.remove('drag');
+  var file = e.dataTransfer.files[0];
+  if (file) {
+    CA2_FILE = file;
+    document.getElementById('f-staff').files = e.dataTransfer.files;
+    var nameEl = document.getElementById('dz-staff-name');
+    nameEl.textContent = file.name;
+    nameEl.classList.remove('hidden');
+    document.getElementById('dz-staff').classList.add('ready');
+    document.getElementById('ca2-run-btn').disabled = false;
+  }
+}
+
+function ca2ResetFile() {
+  CA2_FILE = null;
+  document.getElementById('f-staff').value = '';
+  document.getElementById('dz-staff-name').classList.add('hidden');
+  document.getElementById('dz-staff').classList.remove('ready');
+  document.getElementById('ca2-run-btn').disabled = true;
+}
+
+async function ca2Run() {
+  if (!CA2_FILE) return;
+  showOverlay('正在分析人员成本…');
+  try {
+    var fd = new FormData();
+    fd.append('staff_file', CA2_FILE);
+    var res = await api('POST', '/api/cost-analysis/jobs', fd, true);
+    var data = await res.json();
+    if (!res.ok) { showToast(data.message || '分析失败', 'error'); return; }
+    S.ca2_currentJobId = data.id;
+    ca2RenderResult(data);
+    ca2GoStep(2);
+    showToast('分析完成', 'success');
+  } catch(e) {
+    showToast('分析失败：' + e.message, 'error');
+  } finally {
+    hideOverlay();
+  }
+}
+
+function ca2RenderResult(data) {
+  var s = data.summary || {};
+  document.getElementById('ca2-stat-persons').textContent = s.total_persons || 0;
+  document.getElementById('ca2-stat-depts').textContent = s.dept_count || 0;
+  document.getElementById('ca2-stat-total').textContent = s.total_cost ? Number(s.total_cost).toLocaleString() : '0';
+  document.getElementById('ca2-stat-avg').textContent = s.avg_cost ? Number(s.avg_cost).toLocaleString() : '0';
+
+  document.getElementById('ca2-scope').textContent = '统计口径：' + (s.cost_scope || '月薪合计，不含奖金和社保');
+  document.getElementById('ca2-res-sub').textContent =
+    '共 ' + (s.total_persons||0) + ' 人，' + (s.dept_count||0) + ' 个部门，' +
+    (s.level_count||0) + ' 个职级';
+
+  var files = data.files || [];
+  var verified = files.every(function(f) { return f.readonly_verified; });
+  document.getElementById('ca2-readonly-text').innerHTML = verified
+    ? '人员表全程只读，SHA-256 校验一致。<b>本次分析未修改任何原始文件。</b>'
+    : '人员表全程只读，SHA-256 校验。<b style="color:var(--alert)">校验异常。</b>';
+
+  document.getElementById('ca2-audit-id').textContent = data.id || '';
+  document.getElementById('ca2-audit-user').textContent = S.displayName || S.username || '';
+  document.getElementById('ca2-audit-time').textContent = data.created_at || '';
+  document.getElementById('ca2-audit-scope').textContent = s.cost_scope || '';
+
+  document.getElementById('ca2-s2-btn').disabled = false;
+  S.ca2_viewMode = 'dept';
+  document.getElementById('ca2-tab-dept').classList.add('active');
+  document.getElementById('ca2-tab-level').classList.remove('active');
+  ca2LoadRows();
+}
+
+async function ca2LoadRows() {
+  if (!S.ca2_currentJobId) return;
+  try {
+    var resp = await api('GET', '/api/jobs/' + S.ca2_currentJobId + '/rows?page=1&page_size=9999');
+    var res = await resp.json();
+    S.ca2_allRows = res.items || [];
+    ca2RenderBarChart();
+    ca2RenderCurrentView();
+  } catch(e) {
+    document.getElementById('ca2-detail-body').innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--red)">加载失败</td></tr>';
+  }
+}
+
+function ca2RenderBarChart() {
+  var deptRows = S.ca2_allRows.filter(function(r) { return r.row_type === 'dept_summary'; });
+  var container = document.getElementById('ca2-bar-chart');
+  if (!deptRows.length) {
+    container.innerHTML = '<div style="color:var(--ink3);padding:20px;text-align:center">无数据</div>';
+    return;
+  }
+  var maxPct = Math.max.apply(null, deptRows.map(function(r) { return parseFloat(r.pct) || 0; }));
+  var html = '';
+  deptRows.forEach(function(r) {
+    var pct = parseFloat(r.pct) || 0;
+    var width = maxPct > 0 ? (pct / maxPct * 100) : 0;
+    var cost = Number(r.total_cost).toLocaleString();
+    html += '<div class="bar-row">' +
+      '<div class="bar-label">' + esc(r.dept) + '</div>' +
+      '<div class="bar-track"><div class="bar-fill" style="width:' + width + '%"><span class="bar-val">' + cost + '</span></div></div>' +
+      '<div class="bar-pct">' + pct + '%</div>' +
+      '</div>';
+  });
+  container.innerHTML = html;
+}
+
+function ca2SwitchView(mode) {
+  S.ca2_viewMode = mode;
+  document.getElementById('ca2-tab-dept').classList.toggle('active', mode === 'dept');
+  document.getElementById('ca2-tab-level').classList.toggle('active', mode === 'level');
+  document.getElementById('ca2-tab-person').classList.toggle('active', mode === 'person');
+  ca2RenderCurrentView();
+}
+
+function ca2RenderCurrentView() {
+  if (S.ca2_viewMode === 'dept') {
+    ca2RenderDeptTable();
+  } else if (S.ca2_viewMode === 'level') {
+    ca2RenderLevelTable();
+  } else {
+    ca2RenderPersonTable();
+  }
+}
+
+function ca2RenderDeptTable() {
+  document.getElementById('ca2-thead').innerHTML =
+    '<tr><th>#</th><th>部门</th><th class="num">人数</th><th class="num">总月薪</th><th class="num">人均月薪</th><th class="num">占比(%)</th></tr>';
+  var rows = S.ca2_allRows.filter(function(r) { return r.row_type === 'dept_summary'; });
+  var tbody = document.getElementById('ca2-detail-body');
+  if (!rows.length) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--ink3)">无数据</td></tr>';
+    return;
+  }
+  var html = '';
+  rows.forEach(function(r, i) {
+    html += '<tr>' +
+      '<td>' + (i + 1) + '</td>' +
+      '<td>' + esc(r.dept) + '</td>' +
+      '<td class="num">' + r.headcount + '</td>' +
+      '<td class="num">' + Number(r.total_cost).toLocaleString() + '</td>' +
+      '<td class="num">' + Number(r.avg_cost).toLocaleString() + '</td>' +
+      '<td class="num">' + r.pct + '</td>' +
+      '</tr>';
+  });
+  tbody.innerHTML = html;
+}
+
+function ca2RenderLevelTable() {
+  document.getElementById('ca2-thead').innerHTML =
+    '<tr><th>#</th><th>部门</th><th>职级</th><th class="num">人数</th><th class="num">总月薪</th><th class="num">人均月薪</th><th class="num">占比(%)</th></tr>';
+  var rows = S.ca2_allRows.filter(function(r) { return r.row_type === 'dept_level'; });
+  var tbody = document.getElementById('ca2-detail-body');
+  if (!rows.length) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--ink3)">无数据</td></tr>';
+    return;
+  }
+  var html = '';
+  rows.forEach(function(r, i) {
+    html += '<tr>' +
+      '<td>' + (i + 1) + '</td>' +
+      '<td>' + esc(r.dept) + '</td>' +
+      '<td>' + esc(r.level) + '</td>' +
+      '<td class="num">' + r.headcount + '</td>' +
+      '<td class="num">' + Number(r.total_cost).toLocaleString() + '</td>' +
+      '<td class="num">' + Number(r.avg_cost).toLocaleString() + '</td>' +
+      '<td class="num">' + r.pct + '</td>' +
+      '</tr>';
+  });
+  tbody.innerHTML = html;
+}
+
+function ca2RenderPersonTable() {
+  document.getElementById('ca2-thead').innerHTML =
+    '<tr><th>#</th><th>工号</th><th>姓名</th><th>部门</th><th>职级</th><th class="num">月薪</th></tr>';
+  var rows = S.ca2_allRows.filter(function(r) { return r.row_type === 'detail'; });
+  var tbody = document.getElementById('ca2-detail-body');
+  if (!rows.length) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--ink3)">无数据</td></tr>';
+    return;
+  }
+  var html = '';
+  rows.forEach(function(r, i) {
+    html += '<tr>' +
+      '<td>' + (i + 1) + '</td>' +
+      '<td><code style="font-family:monospace;font-size:12px">' + esc(r.match_key || '') + '</code></td>' +
+      '<td>' + esc(r.name || '') + '</td>' +
+      '<td>' + esc(r.dept || '') + '</td>' +
+      '<td>' + esc(r.level || '') + '</td>' +
+      '<td class="num">' + Number(r.monthly_salary).toLocaleString() + '</td>' +
+      '</tr>';
+  });
+  tbody.innerHTML = html;
+}
+
+async function ca2Export() {
+  if (!S.ca2_currentJobId) return;
+  showOverlay('正在导出…');
+  try {
+    var res = await api('GET', '/api/jobs/' + S.ca2_currentJobId + '/export');
+    if (!res.ok) { showToast('导出失败', 'error'); return; }
+    var blob = await res.blob();
+    var cd = res.headers.get('Content-Disposition') || '';
+    var filename = parseDownloadFilename(cd, '人员成本分析.xlsx');
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url; a.download = filename; a.click();
+    URL.revokeObjectURL(url);
+    showToast('导出成功', 'success');
+  } catch(e) {
+    showToast('导出失败：' + e.message, 'error');
+  } finally {
+    hideOverlay();
+  }
+}
+
+async function ca2LoadHistory() {
+  try {
+    var resp = await api('GET', '/api/jobs?module=cost_analysis');
+    var res = await resp.json();
+    var jobs = res.items || [];
+    var tbody = document.getElementById('ca2-history-body');
+    if (!jobs.length) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--ink3)">暂无记录</td></tr>';
+      return;
+    }
+    var html = '';
+    jobs.forEach(function(j) {
+      var s = j.summary || {};
+      var summary = (s.dept_count||0) + '部门 / 总月薪' + (s.total_cost ? Number(s.total_cost).toLocaleString() : '0');
+      html += '<tr>' +
+        '<td>' + esc(j.created_at || '') + '</td>' +
+        '<td><span class="chip ok">done</span></td>' +
+        '<td>' + esc(j.created_by || '') + '</td>' +
+        '<td class="num">' + (s.total_persons||0) + '</td>' +
+        '<td>' + esc(summary) + '</td>' +
+        '<td><button class="btn sm" onclick="ca2ViewJob(\'' + j.id + '\')">查看</button></td>' +
+        '</tr>';
+    });
+    tbody.innerHTML = html;
+  } catch(e) {
+    document.getElementById('ca2-history-body').innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--red)">加载失败</td></tr>';
+  }
+}
+
+async function ca2ViewJob(jobId) {
+  S.ca2_currentJobId = jobId;
+  try {
+    var resp = await api('GET', '/api/jobs/' + jobId);
+    var res = await resp.json();
+    ca2RenderResult(res);
+    ca2GoStep(2);
+  } catch(e) {
+    alert('加载失败：' + e.message);
+  }
 }
 </script>
 </body>
